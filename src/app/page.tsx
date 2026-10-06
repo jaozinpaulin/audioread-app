@@ -1,15 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Search, Menu, BookOpen, Headphones, Settings, Upload } from 'lucide-react';
 
 export default function Home() {
+    const pathname = usePathname();
+
     const [documents] = useState([
         { id: '1', title: 'Tudo é Rio - Carla Madeira', pages: 121, progress: 45 },
         { id: '2', title: 'Apostila de Desenvolvimento Web - Senac', pages: 85, progress: 70 },
         { id: '3', title: 'Clean Code - Robert C. Martin', pages: 425, progress: 20 },
         { id: '4', title: 'Arquitetura Limpa', pages: 310, progress: 10 },
     ]);
+
+    const navItems = [
+        { name: 'Library', href: '/', icon: BookOpen },
+        { name: 'Reading', href: '/reading', icon: Headphones },
+        { name: 'Settings', href: '/settings', icon: Settings },
+    ];
 
     return (
         <main className="flex-1 flex flex-col justify-between p-4 md:p-8 pb-32 md:pb-12 max-w-3xl mx-auto w-full min-h-screen">
@@ -34,8 +44,9 @@ export default function Home() {
 
                 <div className="space-y-3 pb-4">
                     {documents.map((doc) => (
-                        <div
+                        <Link
                             key={doc.id}
+                            href="/reading"
                             className="flex items-center justify-between p-4 rounded-2xl bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all cursor-pointer"
                         >
                             <div className="flex items-center gap-3.5">
@@ -47,31 +58,36 @@ export default function Home() {
                                     <p className="text-xs text-zinc-400 mt-0.5">{doc.pages} pages</p>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>
 
-            <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-app-bg/95 backdrop-blur-md border-t border-zinc-800/80 px-4 py-3 flex flex-col gap-9 z-50 md:relative md:max-w-none md:bg-transparent md:border-none md:p-0 md:backdrop-blur-none">
-
+            <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-app-bg px-4 py-3 flex flex-col gap-9 z-50 md:relative md:max-w-none md:bg-transparent md:border-none md:p-0">
                 <button className="w-full py-3.5 px-4 rounded-2xl bg-accent-crimson hover:bg-[#b0453c] text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer">
                     <Upload className="w-4 h-4" />
                     <span>Importar PDF</span>
                 </button>
 
                 <nav className="md:hidden flex items-center justify-around pt-1 pb-1">
-                    <div className="flex flex-col items-center gap-1 cursor-pointer">
-                        <BookOpen className="w-4 h-4 text-primary-rose" />
-                        <span className="text-[10px] font-semibold text-primary-rose">Library</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 cursor-pointer text-zinc-400 hover:text-zinc-100 transition-colors">
-                        <Headphones className="w-4 h-4" />
-                        <span className="text-[10px] font-medium">Player</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1 cursor-pointer text-zinc-400 hover:text-zinc-100 transition-colors">
-                        <Settings className="w-4 h-4" />
-                        <span className="text-[10px] font-medium">Settings</span>
-                    </div>
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href;
+
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${isActive ? 'text-primary-rose' : 'text-zinc-400 hover:text-zinc-100'
+                                    }`}
+                            >
+                                <Icon className="w-4 h-4" />
+                                <span className={`text-[10px] ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                                    {item.name}
+                                </span>
+                            </Link>
+                        );
+                    })}
                 </nav>
             </div>
 
