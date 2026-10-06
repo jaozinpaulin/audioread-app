@@ -1,42 +1,33 @@
 'use client';
 
 import { useState } from 'react';
+import { Search, Menu, BookOpen, Headphones, Settings, Upload } from 'lucide-react';
 
 export default function Home() {
-    const [documents, setDocuments] = useState([
+    const [documents] = useState([
         { id: '1', title: 'Tudo é Rio - Carla Madeira', pages: 121, progress: 45 },
         { id: '2', title: 'Apostila de Desenvolvimento Web - Senac', pages: 85, progress: 70 },
     ]);
 
-    const [searchTerm, setSearchTerm] = useState('');
-
     return (
-        <main className="flex-1 flex flex-col justify-between p-4 md:p-8 pb-28 md:pb-12">
+        <main className="flex-1 flex flex-col justify-between p-4 md:p-8 pb-28 md:pb-12 max-w-3xl mx-auto w-full">
 
-            <header className="py-4 border-b border-border-subtle flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent-crimson flex items-center justify-center text-white font-bold">
-                    </div>
-                    <h1 className="font-bold text-lg md:text-xl tracking-tight text-text-main">Audio Documents</h1>
-                </div>
+            <header className="py-4 border-b border-zinc-800/80 flex items-center justify-between">
+                <h1 className="font-bold text-lg md:text-xl tracking-tight text-zinc-100">AudioRead</h1>
 
-                <div className="flex items-center gap-2">
-                    <button className="p-2.5 rounded-xl bg-card-bg border border-border-subtle hover:bg-card-hover transition-colors text-text-muted">
-                    </button>
-                    <button className="p-2.5 rounded-xl bg-card-bg border border-border-subtle hover:bg-card-hover transition-colors text-primary-rose">
-                    </button>
-                </div>
+                <button className="p-2.5 rounded-xl bg-zinc-900/50 border border-zinc-800/60 hover:border-zinc-700 transition-colors text-zinc-300 flex items-center justify-center cursor-pointer">
+                    <Menu className="w-5 h-5 text-zinc-200" />
+                </button>
             </header>
 
-            <div className="space-y-6 my-6 flex-1 max-w-3xl w-full mx-auto">
+            <div className="space-y-6 my-6 flex-1">
 
                 <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
                     <input
                         type="text"
                         placeholder="Search documents"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-card-bg border border-border-subtle rounded-2xl px-4 py-3.5 text-sm text-text-main placeholder-text-muted focus:outline-none focus:border-primary-rose transition-all"
+                        className="w-full bg-zinc-900/90 border border-zinc-700/70 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-primary-rose transition-all shadow-sm"
                     />
                 </div>
 
@@ -44,20 +35,16 @@ export default function Home() {
                     {documents.map((doc) => (
                         <div
                             key={doc.id}
-                            className="flex items-center justify-between p-4 rounded-2xl bg-card-bg border border-border-subtle hover:border-primary-rose/40 transition-all cursor-pointer hover:bg-card-hover"
+                            className="flex items-center justify-between p-4 rounded-2xl bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all cursor-pointer shadow-sm"
                         >
                             <div className="flex items-center gap-3.5">
-                                <div className="w-10 h-12 rounded-lg bg-accent-crimson/20 border border-accent-crimson/30 flex items-center justify-center text-primary-rose">
+                                <div className="w-10 h-12 rounded-lg bg-primary-rose/10 border border-primary-rose/20 flex items-center justify-center text-primary-rose">
+                                    <BookOpen className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="font-medium text-sm md:text-base text-text-main">{doc.title}</h3>
-                                    <p className="text-xs text-text-muted mt-0.5">{doc.pages} pages</p>
+                                    <h3 className="font-medium text-sm md:text-base text-zinc-100">{doc.title}</h3>
+                                    <p className="text-xs text-zinc-400 mt-0.5">{doc.pages} pages</p>
                                 </div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <button className="p-2 rounded-xl bg-card-bg text-text-muted hover:text-red-400 transition-colors">
-                                </button>
                             </div>
                         </div>
                     ))}
@@ -65,20 +52,26 @@ export default function Home() {
 
             </div>
 
-            <div className="max-w-3xl w-full mx-auto space-y-3 pt-4">
-                <button className="w-full py-3.5 px-4 rounded-2xl bg-card-bg border border-border-subtle hover:bg-card-hover text-text-main font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer">
-                    <span>Paste from Clipboard</span>
-                </button>
-
-                <button className="w-full py-3.5 px-4 rounded-2xl bg-accent-crimson hover:bg-[#b0453c] text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer">
-                    <span>Import Document</span>
+            <div className="pt-4">
+                <button className="w-full py-3.5 px-4 rounded-2xl bg-accent-crimson hover:bg-[#b0453c] text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-md shadow-accent-crimson/20">
+                    <Upload className="w-4 h-4" />
+                    <span>Importar PDF</span>
                 </button>
             </div>
 
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-app-bg border-t border-border-subtle px-6 py-3 flex items-center justify-around z-50">
-                <span className="text-xs font-medium text-primary-rose cursor-pointer">Library</span>
-                <span className="text-xs font-medium text-text-muted cursor-pointer hover:text-text-main transition-colors">Player</span>
-                <span className="text-xs font-medium text-text-muted cursor-pointer hover:text-text-main transition-colors">Settings</span>
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-app-bg border-t border-zinc-800/80 px-6 py-3 flex items-center justify-around z-50">
+                <div className="flex flex-col items-center gap-1 cursor-pointer">
+                    <BookOpen className="w-4 h-4 text-primary-rose" />
+                    <span className="text-[10px] font-semibold text-primary-rose">Library</span>
+                </div>
+                <div className="flex flex-col items-center gap-1 cursor-pointer text-zinc-400 hover:text-zinc-100 transition-colors">
+                    <Headphones className="w-4 h-4" />
+                    <span className="text-[10px] font-medium">Player</span>
+                </div>
+                <div className="flex flex-col items-center gap-1 cursor-pointer text-zinc-400 hover:text-zinc-100 transition-colors">
+                    <Settings className="w-4 h-4" />
+                    <span className="text-[10px] font-medium">Settings</span>
+                </div>
             </nav>
 
         </main>
