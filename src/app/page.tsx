@@ -1,11 +1,13 @@
 // @ts-nocheck
 'use client';
 
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Search, BookOpen, Headphones, Info, Upload } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist';
+import { useDocuments } from './hooks/useDocuments';
+
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -13,8 +15,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 export default function Home() {
+    const { documents, setDocuments, setSelectedDocument } = useDocuments()
+
+    const router = useRouter();
     const pathname = usePathname();
-    const [documents, setDocuments] = useState([]);
+    // const [documents, setDocuments] = useState([]);
 
     const navItems = [
         { name: 'Biblioteca', href: '/', icon: BookOpen },
@@ -43,6 +48,11 @@ export default function Home() {
         window.open(pdfUrl, '_blank');
     };
 
+    const handleOpenPdfPage = (doc) => {
+        setSelectedDocument(doc)
+        router.push("/reading")
+    }
+
     return (
         <main className="flex-1 flex flex-col justify-between p-4 md:p-8 pb-32 md:pb-12 max-w-3xl mx-auto w-full min-h-screen">
             <header className="fixed top-0 left-0 right-0 max-w-3xl mx-auto bg-app-bg/85 backdrop-blur-md px-4 md:px-8 py-3.5 border-b border-border-subtle flex items-center justify-between shrink-0 z-50">
@@ -51,6 +61,7 @@ export default function Home() {
                 </h1>
                 <span>v0.2</span>
             </header>
+
 
             <div className="space-y-6 pt-16 my-6 flex-1 overflow-y-auto">
                 <div className="relative">
@@ -83,7 +94,9 @@ export default function Home() {
                     {documents.map((doc) => (
                         <div
                             key={`${doc.name}-${doc.file.lastModified}`}
-                            onClick={() => handleOpenPdf(doc)}
+                            onClick={() => {
+                                handleOpenPdfPage(doc)
+                            }}
                             className="flex items-center justify-between p-4 rounded-2xl bg-card-bg border border-border-subtle hover:border-zinc-700 hover:bg-card-hover transition-all cursor-pointer"
                         >
                             <div className="flex items-center gap-3.5">
