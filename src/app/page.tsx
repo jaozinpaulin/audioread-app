@@ -1,19 +1,21 @@
+// @ts-nocheck
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Menu, BookOpen, Headphones, Info, Upload } from 'lucide-react';
+import { Search, BookOpen, Headphones, Info, Upload } from 'lucide-react';
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+).toString();
 
 export default function Home() {
     const pathname = usePathname();
-
-    const [documents] = useState([
-        { id: '1', title: 'Tudo é Rio - Carla Madeira', pages: 121, progress: 45 },
-        { id: '2', title: 'Apostila de Desenvolvimento Web - Senac', pages: 85, progress: 70 },
-        { id: '3', title: 'Clean Code - Robert C. Martin', pages: 425, progress: 20 },
-        { id: '4', title: 'Arquitetura Limpa', pages: 310, progress: 10 },
-    ]);
+    const fileInputRef = useRef(null);
+    const [documents, setDocuments] = useState([]);
 
     const navItems = [
         { name: 'Biblioteca', href: '/', icon: BookOpen },
@@ -21,18 +23,42 @@ export default function Home() {
         { name: 'Info', href: '/info', icon: Info },
     ];
 
+    const handleOpenPicker = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = async (evt) => {
+        const file = evt.target.files?.[0];
+
+        if (!file) return;
+
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+        console.log('Arquivo:', file.name);
+        console.log('Páginas:', pdf.numPages);
+
+        setDocuments((prev) => [...prev, {
+            file,
+            name: file.name,
+            pages: pdf.numPages,
+            currentPage: 1,
+        }]);
+    };
+
+
     return (
         <main className="flex-1 flex flex-col justify-between p-4 md:p-8 pb-32 md:pb-12 max-w-3xl mx-auto w-full min-h-screen">
-
-            <header className="py-4 border-b border-border-subtle flex items-center justify-between shrink-0">
-                <h1 className="font-bold text-lg md:text-xl tracking-tight text-text-main">AudioRead</h1>
-
-                <button className="p-2.5 rounded-xl bg-card-bg border border-border-subtle hover:border-zinc-700 transition-colors text-text-muted flex items-center justify-center cursor-pointer">
-                    <Menu className="w-5 h-5 text-text-main" />
-                </button>
+            <header className="fixed top-0 left-0 right-0 max-w-3xl mx-auto bg-app-bg/85 backdrop-blur-md px-4 md:px-8 py-3.5 border-b border-border-subtle flex items-center justify-between shrink-0 z-50">
+                <h1 className="font-bold text-lg md:text-xl tracking-tight text-text-main">
+                    AudioRead
+                </h1>
+                <span>v0.2</span>
             </header>
 
-            <div className="space-y-6 my-6 flex-1 overflow-y-auto">
+            <div className="space-y-6 pt-16 my-6 flex-1 overflow-y-auto">
                 <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     <input
@@ -43,28 +69,60 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-3 pb-4">
+                    {documents.length === 0 && (
+                        <div className="py-14 flex flex-col items-center justify-center text-center space-y-3 rounded-2xl border border-dashed border-border-subtle bg-card-bg/20 p-6">
+                            <div className="w-11 h-11 rounded-xl bg-card-bg border border-border-subtle flex items-center justify-center text-text-muted">
+                                <BookOpen className="w-5 h-5" />
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-text-main">
+                                    Nenhum documento encontrado
+                                </p>
+                                <p className="text-xs text-text-muted">
+                                    Importe um PDF para iniciar sua leitura.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {documents.map((doc) => (
-                        <Link
-                            key={doc.id}
-                            href="/reading"
-                            className="flex items-center justify-between p-4 rounded-2xl bg-card-bg border border-border-subtle hover:border-zinc-700 hover:bg-card-hover transition-all cursor-pointer"
+                        <div
+                            key={`${doc.name}-${doc.file.lastModified}`}
+                            className="flex items-center justify-between p-4 rounded-2xl bg-card-bg border border-border-subtle hover:border-zinc-700 hover:bg-card-hover transition-all"
                         >
                             <div className="flex items-center gap-3.5">
-                                <div className="w-10 h-12 rounded-lg bg-primary-rose/10 border border-primary-rose/20 flex items-center justify-center text-primary-rose font-semibold text-xs">
+                                <div className="w-10 h-12 rounded-lg bg-primary-rose/10 border border-primary-rose/20 flex items-center justify-center text-primary-rose">
                                     <BookOpen className="w-5 h-5" />
                                 </div>
+
                                 <div>
-                                    <h3 className="font-medium text-sm md:text-base text-text-main">{doc.title}</h3>
-                                    <p className="text-xs text-text-muted mt-0.5">{doc.pages} páginas</p>
+                                    <h3 className="font-medium text-sm md:text-base text-text-main">
+                                        {doc.name}
+                                    </h3>
+
+                                    <p className="text-xs text-text-muted mt-0.5">
+                                        PDF · {doc.pages} páginas
+                                    </p>
                                 </div>
                             </div>
-                        </Link>
+                        </div>
                     ))}
                 </div>
             </div>
 
-            <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-app-bg px-4 py-3 flex flex-col gap-8 z-50 md:relative md:max-w-none md:bg-transparent md:border-none md:p-0">
-                <button className="w-full py-3.5 px-4 rounded-2xl bg-accent-crimson hover:bg-[#b0453c] text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer">
+            <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-app-bg/90 backdrop-blur-md px-4 py-3 flex flex-col gap-6 z-50 md:relative md:max-w-none md:bg-transparent md:backdrop-blur-none md:p-0">
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    onChange={handleFileChange}
+                />
+
+                <button
+                    onClick={handleOpenPicker}
+                    className="w-full py-3.5 px-4 rounded-2xl bg-accent-crimson hover:bg-[#b0453c] text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+                >
                     <Upload className="w-4 h-4" />
                     <span>Importar PDF</span>
                 </button>
@@ -78,11 +136,16 @@ export default function Home() {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${isActive ? 'text-primary-rose' : 'text-text-muted hover:text-text-main'
+                                className={`flex flex-col items-center gap-1 cursor-pointer transition-colors ${isActive
+                                    ? 'text-primary-rose'
+                                    : 'text-text-muted hover:text-text-main'
                                     }`}
                             >
                                 <Icon className="w-4 h-4" />
-                                <span className={`text-[10px] ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                                <span
+                                    className={`text-[10px] ${isActive ? 'font-semibold' : 'font-medium'
+                                        }`}
+                                >
                                     {item.name}
                                 </span>
                             </Link>
@@ -90,7 +153,6 @@ export default function Home() {
                     })}
                 </nav>
             </div>
-
         </main>
     );
 }
