@@ -3,20 +3,21 @@
 @theme {
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 
-  --color-app-bg: #0D090A;
-  --color-card-bg: #161012;
-  --color-card-hover: #1F1518;
+  --color-app-bg: #09090b;
+  --color-card-bg: #121215;
+  --color-card-hover: #18181b;
   --color-primary-rose: #E2847A;
   --color-accent-crimson: #C75146;
   --color-text-main: #FDF8F8;
-  --color-text-muted: #A39393;
-  --color-border-subtle: #261B1D;
+  --color-text-muted: #A1A1AA;
+  --color-border-subtle: #27272a;
 }
 
 :root {
   color-scheme: dark;
 }
 
+html,
 body {
   background-color: var(--color-app-bg);
   color: var(--color-text-main);
@@ -39,5 +40,5 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3D292C;
+  background: #3f3f46;
 }
