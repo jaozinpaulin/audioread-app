@@ -1,10 +1,36 @@
+// @ts-nocheck
 'use client';
+
 
 import Link from 'next/link';
 import { ArrowLeft, SlidersHorizontal, ChevronRight, SkipBack, RotateCcw, Play, RotateCw, SkipForward, } from 'lucide-react';
+import { useDocuments } from '../hooks/useDocuments';
 
+import * as pdfjsLib from "pdfjs-dist";
+import { useEffect, useState } from 'react';
 
 export default function ReadingPage() {
+    const { selectedDocument } = useDocuments();
+    const [text, setText] = useState('');
+
+    const readPdf = async () => {
+        if (!selectedDocument) return;
+
+        const file = selectedDocument.file;
+
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+        const page = await pdf.getPage(2);
+
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item) => item.str).join(' ');
+
+        setText(pageText);
+    }
+
+    readPdf()
+
     return (
         <main className="flex-1 flex flex-col justify-between max-w-2xl mx-auto w-full min-h-screen text-zinc-100 px-4">
 
@@ -31,7 +57,7 @@ export default function ReadingPage() {
 
                 <div className="min-h-full flex items-center justify-center">
                     <p className="text-zinc-500 text-sm">
-                        PDF text will appear here.
+                        {text}
                     </p>
                 </div>
 
