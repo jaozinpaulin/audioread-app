@@ -1,11 +1,11 @@
 // @ts-nocheck
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search, BookOpen, Headphones, Info, Upload } from 'lucide-react';
-import * as pdfjsLib from "pdfjs-dist";
+import * as pdfjsLib from 'pdfjs-dist';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -14,7 +14,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 export default function Home() {
     const pathname = usePathname();
-    const fileInputRef = useRef(null);
     const [documents, setDocuments] = useState([]);
 
     const navItems = [
@@ -22,12 +21,6 @@ export default function Home() {
         { name: 'Leitura', href: '/reading', icon: Headphones },
         { name: 'Info', href: '/info', icon: Info },
     ];
-
-    const handleOpenPicker = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    };
 
     const handleFileChange = async (evt) => {
         const file = evt.target.files?.[0];
@@ -37,9 +30,6 @@ export default function Home() {
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-        console.log('Arquivo:', file.name);
-        console.log('Páginas:', pdf.numPages);
-
         setDocuments((prev) => [...prev, {
             file,
             name: file.name,
@@ -48,6 +38,10 @@ export default function Home() {
         }]);
     };
 
+    const handleOpenPdf = (doc) => {
+        const pdfUrl = URL.createObjectURL(doc.file);
+        window.open(pdfUrl, '_blank');
+    };
 
     return (
         <main className="flex-1 flex flex-col justify-between p-4 md:p-8 pb-32 md:pb-12 max-w-3xl mx-auto w-full min-h-screen">
@@ -74,6 +68,7 @@ export default function Home() {
                             <div className="w-11 h-11 rounded-xl bg-card-bg border border-border-subtle flex items-center justify-center text-text-muted">
                                 <BookOpen className="w-5 h-5" />
                             </div>
+
                             <div className="space-y-1">
                                 <p className="text-sm font-medium text-text-main">
                                     Nenhum documento encontrado
@@ -88,7 +83,8 @@ export default function Home() {
                     {documents.map((doc) => (
                         <div
                             key={`${doc.name}-${doc.file.lastModified}`}
-                            className="flex items-center justify-between p-4 rounded-2xl bg-card-bg border border-border-subtle hover:border-zinc-700 hover:bg-card-hover transition-all"
+                            onClick={() => handleOpenPdf(doc)}
+                            className="flex items-center justify-between p-4 rounded-2xl bg-card-bg border border-border-subtle hover:border-zinc-700 hover:bg-card-hover transition-all cursor-pointer"
                         >
                             <div className="flex items-center gap-3.5">
                                 <div className="w-10 h-12 rounded-lg bg-primary-rose/10 border border-primary-rose/20 flex items-center justify-center text-primary-rose">
@@ -111,21 +107,17 @@ export default function Home() {
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-app-bg/90 backdrop-blur-md px-4 py-3 flex flex-col gap-6 z-50 md:relative md:max-w-none md:bg-transparent md:backdrop-blur-none md:p-0">
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="application/pdf"
-                    className="hidden"
-                    onChange={handleFileChange}
-                />
-
-                <button
-                    onClick={handleOpenPicker}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-accent-crimson hover:bg-[#b0453c] text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer"
-                >
+                <label className="w-full py-3.5 px-4 rounded-2xl bg-accent-crimson hover:bg-[#b0453c] text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer">
                     <Upload className="w-4 h-4" />
                     <span>Importar PDF</span>
-                </button>
+
+                    <input
+                        type="file"
+                        accept="application/pdf"
+                        className="hidden"
+                        onChange={handleFileChange}
+                    />
+                </label>
 
                 <nav className="md:hidden flex items-center justify-around pt-1 pb-1">
                     {navItems.map((item) => {
@@ -142,6 +134,7 @@ export default function Home() {
                                     }`}
                             >
                                 <Icon className="w-4 h-4" />
+
                                 <span
                                     className={`text-[10px] ${isActive ? 'font-semibold' : 'font-medium'
                                         }`}
