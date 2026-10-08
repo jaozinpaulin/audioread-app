@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 'use client';
 
 import Link from 'next/link';
@@ -12,6 +11,24 @@ export default function ReadingPage() {
     const { selectedDocument } = useDocuments();
 
     const [text, setText] = useState('');
+    const [pageCurent, setPageCurrent] = useState(
+        Number(selectedDocument?.currentPage) || 1
+    );
+    const [totalPages, setTotalPages] = useState(
+        Number(selectedDocument?.pages) || 1
+    );
+
+    const nextPage = () => {
+        if (pageCurent < totalPages) {
+            setPageCurrent(pageCurent + 1);
+        }
+    };
+
+    const prevPage = () => {
+        if (pageCurent > 1) {
+            setPageCurrent(pageCurent - 1);
+        }
+    };
 
     const readPdf = async () => {
         if (!selectedDocument) return;
@@ -21,7 +38,7 @@ export default function ReadingPage() {
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-        const page = await pdf.getPage(8);
+        const page = await pdf.getPage(pageCurent);
         const textContent = await page.getTextContent();
 
         const items = [];
@@ -41,11 +58,12 @@ export default function ReadingPage() {
             .join(' ');
 
         setText(pageText);
+        setTotalPages(pdf.numPages);
     };
 
     useEffect(() => {
         readPdf();
-    }, [selectedDocument]);
+    }, [selectedDocument, pageCurent]);
 
     return (
         <main className="flex-1 flex flex-col justify-between max-w-2xl mx-auto w-full min-h-screen text-zinc-100 px-4">
@@ -80,7 +98,7 @@ export default function ReadingPage() {
                         </span>
 
                         <span className="text-xs font-semibold text-zinc-200">
-                            1/1
+                            {pageCurent}/{totalPages}
                         </span>
                     </div>
 
@@ -91,7 +109,11 @@ export default function ReadingPage() {
                 </div>
 
                 <div className="flex items-center justify-between px-6 pt-1">
-                    <button className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer">
+                    <button
+                        onClick={prevPage}
+                        disabled={pageCurent === 1}
+                        className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
                         <SkipBack className="w-5 h-5" />
                     </button>
 
@@ -107,7 +129,11 @@ export default function ReadingPage() {
                         <RotateCw className="w-5 h-5" />
                     </button>
 
-                    <button className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer">
+                    <button
+                        onClick={nextPage}
+                        disabled={pageCurent === totalPages}
+                        className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
                         <SkipForward className="w-5 h-5" />
                     </button>
                 </div>

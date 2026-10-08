@@ -43,10 +43,10 @@ export default function Home() {
         }]);
     };
 
-    const handleOpenPdf = (doc) => {
-        const pdfUrl = URL.createObjectURL(doc.file);
-        window.open(pdfUrl, '_blank');
-    };
+    // const handleOpenPdf = (doc) => {
+    //     const pdfUrl = URL.createObjectURL(doc.file);
+    //     window.open(pdfUrl, '_blank');
+    // };
 
     const handleOpenPdfPage = (doc) => {
         setSelectedDocument(doc)
@@ -120,6 +120,7 @@ export default function Home() {
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-app-bg/90 backdrop-blur-md px-4 py-3 flex flex-col gap-6 z-50 md:relative md:max-w-none md:bg-transparent md:backdrop-blur-none md:p-0">
+
                 <label className="w-full py-3.5 px-4 rounded-2xl bg-accent-crimson hover:bg-[#b0453c] text-white font-medium text-sm transition-all flex items-center justify-center gap-2.5 cursor-pointer">
                     <Upload className="w-4 h-4" />
                     <span>Importar PDF</span>
