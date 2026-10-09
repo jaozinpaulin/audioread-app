@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 export default function ReadingPage() {
     const { selectedDocument } = useDocuments();
 
-    const [text, setText] = useState('');
+    const [paragraphs, setParagraphs] = useState<string[]>([]);
     const [pageCurent, setPageCurrent] = useState(
         Number(selectedDocument?.currentPage) || 1
     );
@@ -19,45 +19,63 @@ export default function ReadingPage() {
     );
 
     const nextPage = () => {
-        if (pageCurent < totalPages) {
-            setPageCurrent(pageCurent + 1);
-        }
+        if (pageCurent < totalPages) setPageCurrent(pageCurent + 1);
     };
 
     const prevPage = () => {
-        if (pageCurent > 1) {
-            setPageCurrent(pageCurent - 1);
-        }
+        if (pageCurent > 1) setPageCurrent(pageCurent - 1);
     };
 
     const readPdf = async () => {
         if (!selectedDocument) return;
 
         const file = selectedDocument.file;
-
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
         const page = await pdf.getPage(pageCurent);
         const textContent = await page.getTextContent();
 
-        const items = [];
+        const linesMap = new Map();
 
         textContent.items.forEach((item) => {
-            if ('str' in item) {
-                items.push({
-                    // x: item.transform[4],
-                    // y: item.transform[5],
-                    text: item.str,
-                });
+            if ('str' in item && item.str.trim()) {
+                const y = Math.round(item.transform[5]);
+                if (!linesMap.has(y)) linesMap.set(y, []);
+                linesMap.get(y).push({ x: item.transform[4], text: item.str });
             }
         });
 
-        const pageText = items
-            .map((item) => item.text)
-            .join(' ');
+        const sortedY = Array.from(linesMap.keys()).sort((a, b) => b - a);
+        const extractedParagraphs: string[] = [];
+        let currentParagraph = '';
+        let lastY: number | null = null;
 
-        setText(pageText);
+        sortedY.forEach((y) => {
+            const lineItems = linesMap.get(y).sort((a, b) => a.x - b.x);
+            const lineText = lineItems.map((item) => item.text).join(' ').trim();
+
+            if (!lineText) return;
+
+            const isNewParagraph = lastY !== null && lastY - y > 18;
+
+            if (isNewParagraph && currentParagraph) {
+                extractedParagraphs.push(currentParagraph.trim());
+                currentParagraph = lineText;
+            } else {
+                currentParagraph = currentParagraph
+                    ? `${currentParagraph} ${lineText}`
+                    : lineText;
+            }
+
+            lastY = y;
+        });
+
+        if (currentParagraph) {
+            extractedParagraphs.push(currentParagraph.trim());
+        }
+
+        setParagraphs(extractedParagraphs);
         setTotalPages(pdf.numPages);
     };
 
@@ -85,8 +103,12 @@ export default function ReadingPage() {
             </header>
 
             <div className="flex-1 overflow-y-auto pt-20 pb-48">
-                <div className="py-6 text-zinc-300 leading- text-sm md:text-base tracking-wide">
-                    <p>{text}</p>
+                <div className="py-6 text-zinc-300 text-sm md:text-base tracking-wide space-y-4">
+                    {paragraphs.map((p, index) => (
+                        <p key={index} className="leading-relaxed">
+                            {p}
+                        </p>
+                    ))}
                 </div>
             </div>
 
@@ -96,7 +118,6 @@ export default function ReadingPage() {
                         <span className="text-[10px] uppercase font-medium text-zinc-500 tracking-wider">
                             Page
                         </span>
-
                         <span className="text-xs font-semibold text-zinc-200">
                             {pageCurent}/{totalPages}
                         </span>
