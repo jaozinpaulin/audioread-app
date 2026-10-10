@@ -7,36 +7,56 @@ import { useDocuments } from '../hooks/useDocuments';
 import * as pdfjsLib from 'pdfjs-dist';
 import { useEffect, useState, useRef } from 'react';
 import MenuSettings from '../components/MenuSettings';
-
+import { match } from 'assert';
 
 export default function ReadingPage() {
     const menuRef = useRef(null);
     const { selectedDocument } = useDocuments();
+
+    const [pageCurent, setPageCurrent] = useState(
+        Number(selectedDocument?.currentPage) || 1,
+    );
+    const [totalPages, setTotalPages] = useState(
+        Number(selectedDocument?.pages) || 1,
+    );
+
+    const [pageInput, setPageInput] = useState(String(pageCurent));
+    const [pageError, setPageError] = useState('');
 
     const [paragraphs, setParagraphs] = useState<string[]>([]);
     const [pageImage, setPageImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
+
+
     useEffect(() => {
         const closeMenuSettings = (evt: MouseEvent) => {
-            if (menuRef && evt.target instanceof Node && !menuRef.current.contains(evt.target)) {
-                setIsOpen(false)
+            if (
+                menuRef &&
+                evt.target instanceof Node &&
+                !menuRef.current.contains(evt.target)
+            ) {
+                setIsOpen(false);
             }
-        }
-        document.addEventListener("mousedown", closeMenuSettings);
+        };
+        document.addEventListener('mousedown', closeMenuSettings);
 
         return () => {
-            document.removeEventListener("mousedown", closeMenuSettings);
-        }
-    }, [])
+            document.removeEventListener('mousedown', closeMenuSettings);
+        };
+    }, []);
 
-    const [pageCurent, setPageCurrent] = useState(
-        Number(selectedDocument?.currentPage) || 1
-    );
-    const [totalPages, setTotalPages] = useState(
-        Number(selectedDocument?.pages) || 1
-    );
+    const handleGoToPage = () => {
+        const page = Number(pageInput);
+
+        if (!pageInput.trim() || !Number.isInteger(page)) {
+            setPageError('Enter a valid page number.'); return;
+        } if (page < 1 || page > totalPages) {
+            setPageError(`Choose a page between 1 and ${totalPages}.`); return;
+
+        } setPageError(''); setPageCurrent(page);
+    };
 
     const nextPage = () => {
         if (pageCurent < totalPages) setPageCurrent(pageCurent + 1);
@@ -57,11 +77,10 @@ export default function ReadingPage() {
         canvas.width = viewport.width;
         canvas.height = viewport.height;
 
-        await page.render({ canvas, canvasContext: context, viewport, }).promise;
+        await page.render({ canvas, canvasContext: context, viewport }).promise;
 
         return canvas.toDataURL('image/jpeg', 0.85);
     };
-
 
     const readPdf = async () => {
         if (!selectedDocument) return;
@@ -74,7 +93,8 @@ export default function ReadingPage() {
         try {
             const file = selectedDocument.file;
             const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer })
+                .promise;
 
             const page = await pdf.getPage(pageCurent);
             const textContent = await page.getTextContent();
@@ -85,7 +105,9 @@ export default function ReadingPage() {
                 if ('str' in item && item.str.trim()) {
                     const y = Math.round(item.transform[5]);
                     if (!linesMap.has(y)) linesMap.set(y, []);
-                    linesMap.get(y).push({ x: item.transform[4], text: item.str });
+                    linesMap
+                        .get(y)
+                        .push({ x: item.transform[4], text: item.str });
                 }
             });
 
@@ -96,7 +118,10 @@ export default function ReadingPage() {
 
             sortedY.forEach((y) => {
                 const lineItems = linesMap.get(y).sort((a, b) => a.x - b.x);
-                const lineText = lineItems.map((item) => item.text).join(' ').trim();
+                const lineText = lineItems
+                    .map((item) => item.text)
+                    .join(' ')
+                    .trim();
 
                 if (!lineText) return;
 
@@ -125,14 +150,11 @@ export default function ReadingPage() {
 
             setParagraphs(extractedParagraphs);
             setTotalPages(pdf.numPages);
-
         } catch (error) {
-
             console.error('Erro ao ler o PDF:', error);
         } finally {
             setIsLoading(false);
         }
-
     };
 
     useEffect(() => {
@@ -153,12 +175,9 @@ export default function ReadingPage() {
                     Reading
                 </h1>
 
-                <div
-                    ref={menuRef}
-                    className="relative">
+                <div ref={menuRef} className="relative">
                     <MenuSettings isOpen={isOpen} setIsOpen={setIsOpen} />
                 </div>
-
             </header>
 
             <div className="flex-1 overflow-y-auto pt-20 pb-48">
@@ -189,20 +208,52 @@ export default function ReadingPage() {
 
             <div className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800/40 px-4 py-4 space-y-4 z-50">
                 <div className="flex items-center gap-3">
-                    <div className="px-4 py-2.5 rounded-2xl bg-zinc-900/40 border border-zinc-800/50 flex flex-col justify-center min-w-[90px]">
-                        <span className="text-[10px] uppercase font-medium text-zinc-500 tracking-wider">
-                            Page
-                        </span>
-                        <span className="text-xs font-semibold text-zinc-200">
-                            {pageCurent}/{totalPages}
-                        </span>
+                    <div className="relative flex min-w-[90px] flex-col justify-center rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-2.5">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                                Page
+                            </span>
+
+                            <span className="text-xs font-semibold text-zinc-400">
+                                / {totalPages}
+                            </span>
+                        </div>
+
+                        <input
+                            type="number"
+                            inputMode="numeric"
+                            min={1}
+                            max={totalPages}
+                            value={pageInput}
+                            onChange={(evt) => {
+                                setPageInput(evt.target.value);
+                                setPageError('');
+                            }}
+                            onKeyDown={(evt) => {
+                                if (evt.key === 'Enter') {
+                                    handleGoToPage();
+                                }
+                            }}
+                            className="w-full bg-transparent text-sm font-semibold text-zinc-200 outline-none"
+                        />
                     </div>
 
-                    <button className="flex-1 py-3 px-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/50 hover:border-zinc-700 text-zinc-200 font-medium text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        <ChevronRight className="w-4 h-4" />
+                    <button
+                        type="button"
+                        onClick={handleGoToPage}
+                        className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-3 text-xs font-medium text-zinc-200 transition-all hover:border-zinc-700 md:text-sm"
+                    >
+                        <ChevronRight className="h-4 w-4" />
                         <span>Go to page</span>
                     </button>
                 </div>
+
+                {pageError && (
+                    <p role="alert" className="mt-2 text-xs text-red-400">
+                        {pageError}
+                    </p>
+                )}
+
 
                 <div className="flex items-center justify-between px-6 pt-1">
                     <button

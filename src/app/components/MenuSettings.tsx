@@ -32,7 +32,8 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
         <>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center justify-center rounded-xl border p-2.5 transition-colors ${isOpen
+                title="Menu configuracoes acessibilidade"
+                className={`flex items-center justify-center rounded-xl cursor-pointer border p-2.5 transition-colors ${isOpen
                     ? 'border-zinc-700 bg-zinc-900 text-zinc-100'
                     : 'border-zinc-800/50 bg-zinc-900/40 text-zinc-300 hover:border-zinc-700 hover:text-zinc-100'
                     }`}>
