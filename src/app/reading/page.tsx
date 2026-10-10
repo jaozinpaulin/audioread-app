@@ -136,51 +136,87 @@ export default function ReadingPage() {
                 <h1 className="font-semibold text-sm md:text-base text-zinc-100 line-clamp-1 px-3 text-center">
                     Reading
                 </h1>
+                <div className="relative">
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className={`flex items-center justify-center rounded-xl border p-2.5 transition-colors ${isOpen
+                            ? 'border-zinc-700 bg-zinc-900 text-zinc-100'
+                            : 'border-zinc-800/50 bg-zinc-900/40 text-zinc-300 hover:border-zinc-700 hover:text-zinc-100'
+                            }`}
+                    >
+                        <SlidersHorizontal className="h-5 w-5" />
+                    </button>
 
-                <button
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="p-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/50 text-zinc-300 hover:text-zinc-100 hover:border-zinc-700 transition-colors flex items-center justify-center cursor-pointer"
-                >
-                    <SlidersHorizontal className="w-5 h-5" />
-                </button>
+                    {isOpen && (
+                        <div className="absolute right-0 top-full z-50 mt-3 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-zinc-800 bg-zinc-950 p-4 shadow-2xl shadow-black/20">
 
-                {isOpen && (
-                    <div className="fixed top-16 left-4 right-4 z-50 mx-auto max-w-2xl rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-xl">
-                        <h2 className="mb-4 text-sm font-semibold text-zinc-100">
-                            Reading settings
-                        </h2>
+                            <div className="mb-4 border-b border-zinc-800/70 pb-3">
+                                <h2 className="text-sm font-semibold text-zinc-100">
+                                    Reading settings
+                                </h2>
 
-                        <div className="space-y-4 text-sm text-zinc-400">
-                            <div>
-                                <p className="mb-1">Accessibility</p>
-                                <p className="text-xs text-zinc-500">
-                                    Reading preferences
+                                <p className="mt-1 text-xs text-zinc-500">
+                                    Customize your reading experience.
                                 </p>
                             </div>
 
-                            <div>
-                                <p className="mb-1">Orientation</p>
-                                <p className="text-xs text-zinc-500">
-                                    Page layout
-                                </p>
-                            </div>
+                            <div className="space-y-1">
+                                <button className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-zinc-900">
+                                    <div>
+                                        <p className="text-sm text-zinc-200">
+                                            Accessibility
+                                        </p>
+                                        <p className="mt-1 text-xs text-zinc-500">
+                                            Reading preferences
+                                        </p>
+                                    </div>
 
-                            <div>
-                                <p className="mb-1">Appearance</p>
-                                <p className="text-xs text-zinc-500">
-                                    Reading colors
-                                </p>
-                            </div>
+                                    <ChevronRight className="h-4 w-4 text-zinc-500" />
+                                </button>
 
-                            <div>
-                                <p className="mb-1">Audio</p>
-                                <p className="text-xs text-zinc-500">
-                                    Voice and playback
-                                </p>
+                                <button className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-zinc-900">
+                                    <div>
+                                        <p className="text-sm text-zinc-200">
+                                            Orientation
+                                        </p>
+                                        <p className="mt-1 text-xs text-zinc-500">
+                                            Page layout
+                                        </p>
+                                    </div>
+
+                                    <ChevronRight className="h-4 w-4 text-zinc-500" />
+                                </button>
+
+                                <button className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-zinc-900">
+                                    <div>
+                                        <p className="text-sm text-zinc-200">
+                                            Appearance
+                                        </p>
+                                        <p className="mt-1 text-xs text-zinc-500">
+                                            Reading colors
+                                        </p>
+                                    </div>
+
+                                    <ChevronRight className="h-4 w-4 text-zinc-500" />
+                                </button>
+
+                                <button className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-zinc-900">
+                                    <div>
+                                        <p className="text-sm text-zinc-200">
+                                            Audio
+                                        </p>
+                                        <p className="mt-1 text-xs text-zinc-500">
+                                            Voice and playback
+                                        </p>
+                                    </div>
+
+                                    <ChevronRight className="h-4 w-4 text-zinc-500" />
+                                </button>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
+
             </header>
 
             <div className="flex-1 overflow-y-auto pt-20 pb-48">
