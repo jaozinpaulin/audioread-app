@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, SlidersHorizontal, ChevronRight, SkipBack, RotateCcw, Play, RotateCw, SkipForward, } from 'lucide-react';
+import { ArrowLeft, SlidersHorizontal, ChevronRight, SkipBack, RotateCcw, Play, RotateCw, SkipForward, Scale, } from 'lucide-react';
 import { useDocuments } from '../hooks/useDocuments';
 import * as pdfjsLib from 'pdfjs-dist';
 import { useEffect, useState } from 'react';
@@ -11,6 +11,9 @@ export default function ReadingPage() {
     const { selectedDocument } = useDocuments();
 
     const [paragraphs, setParagraphs] = useState<string[]>([]);
+    const [pageImage, setPageImage] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
     const [pageCurent, setPageCurrent] = useState(
         Number(selectedDocument?.currentPage) || 1
     );
@@ -26,57 +29,93 @@ export default function ReadingPage() {
         if (pageCurent > 1) setPageCurrent(pageCurent - 1);
     };
 
+    const renderPageImage = async (page) => {
+        const viewport = page.getViewport({ scale: 1.5 });
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        if (!context) return null;
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({ canvas, canvasContext: context, viewport, }).promise;
+
+        return canvas.toDataURL('image/jpeg', 0.85);
+    };
+
+
     const readPdf = async () => {
         if (!selectedDocument) return;
 
-        const file = selectedDocument.file;
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        setIsLoading(true);
 
-        const page = await pdf.getPage(pageCurent);
-        const textContent = await page.getTextContent();
+        setPageImage(null);
+        setParagraphs([]);
 
-        const linesMap = new Map();
+        try {
+            const file = selectedDocument.file;
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-        textContent.items.forEach((item) => {
-            if ('str' in item && item.str.trim()) {
-                const y = Math.round(item.transform[5]);
-                if (!linesMap.has(y)) linesMap.set(y, []);
-                linesMap.get(y).push({ x: item.transform[4], text: item.str });
-            }
-        });
+            const page = await pdf.getPage(pageCurent);
+            const textContent = await page.getTextContent();
 
-        const sortedY = Array.from(linesMap.keys()).sort((a, b) => b - a);
-        const extractedParagraphs: string[] = [];
-        let currentParagraph = '';
-        let lastY: number | null = null;
+            const linesMap = new Map();
 
-        sortedY.forEach((y) => {
-            const lineItems = linesMap.get(y).sort((a, b) => a.x - b.x);
-            const lineText = lineItems.map((item) => item.text).join(' ').trim();
+            textContent.items.forEach((item) => {
+                if ('str' in item && item.str.trim()) {
+                    const y = Math.round(item.transform[5]);
+                    if (!linesMap.has(y)) linesMap.set(y, []);
+                    linesMap.get(y).push({ x: item.transform[4], text: item.str });
+                }
+            });
 
-            if (!lineText) return;
+            const sortedY = Array.from(linesMap.keys()).sort((a, b) => b - a);
+            const extractedParagraphs: string[] = [];
+            let currentParagraph = '';
+            let lastY: number | null = null;
 
-            const isNewParagraph = lastY !== null && lastY - y > 18;
+            sortedY.forEach((y) => {
+                const lineItems = linesMap.get(y).sort((a, b) => a.x - b.x);
+                const lineText = lineItems.map((item) => item.text).join(' ').trim();
 
-            if (isNewParagraph && currentParagraph) {
+                if (!lineText) return;
+
+                const isNewParagraph = lastY !== null && lastY - y > 18;
+
+                if (isNewParagraph && currentParagraph) {
+                    extractedParagraphs.push(currentParagraph.trim());
+                    currentParagraph = lineText;
+                } else {
+                    currentParagraph = currentParagraph
+                        ? `${currentParagraph} ${lineText}`
+                        : lineText;
+                }
+
+                lastY = y;
+            });
+
+            if (currentParagraph) {
                 extractedParagraphs.push(currentParagraph.trim());
-                currentParagraph = lineText;
-            } else {
-                currentParagraph = currentParagraph
-                    ? `${currentParagraph} ${lineText}`
-                    : lineText;
             }
 
-            lastY = y;
-        });
+            if (extractedParagraphs.length === 0) {
+                const image = await renderPageImage(page);
+                setPageImage(image ?? null);
+            }
 
-        if (currentParagraph) {
-            extractedParagraphs.push(currentParagraph.trim());
+            setParagraphs(extractedParagraphs);
+            setTotalPages(pdf.numPages);
+
+        } catch (error) {
+
+            console.error('Erro ao ler o PDF:', error);
+        } finally {
+            setIsLoading(false);
         }
 
-        setParagraphs(extractedParagraphs);
-        setTotalPages(pdf.numPages);
     };
 
     useEffect(() => {
@@ -104,11 +143,27 @@ export default function ReadingPage() {
 
             <div className="flex-1 overflow-y-auto pt-20 pb-48">
                 <div className="py-6 text-zinc-300 text-sm md:text-base tracking-wide space-y-4">
-                    {paragraphs.map((p, index) => (
-                        <p key={index} className="leading-relaxed">
-                            {p}
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center gap-3 py-16">
+                            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-300" />
+                        </div>
+                    ) : pageImage ? (
+                        <img
+                            src={pageImage}
+                            alt="Não foi possível exibir o texto desta página."
+                            className="w-full h-auto rounded-lg"
+                        />
+                    ) : paragraphs.length > 0 ? (
+                        paragraphs.map((p, index) => (
+                            <p key={index} className="leading-relaxed">
+                                {p}
+                            </p>
+                        ))
+                    ) : (
+                        <p className="py-16 text-center text-sm text-zinc-500">
+                            Nenhum conteúdo disponível.
                         </p>
-                    ))}
+                    )}
                 </div>
             </div>
 
