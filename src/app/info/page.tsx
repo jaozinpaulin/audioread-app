@@ -15,70 +15,80 @@ export default function InfoPage() {
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
 
-                <h1 className="font-medium text-sm text-text-muted">Sobre</h1>
+                <h1 className="font-medium text-sm text-text-muted">
+                    Sobre
+                </h1>
 
-                <div className="w-8"></div>
+                <div className="w-8" />
             </header>
 
             <div className="pt-24 pb-12 space-y-8 flex-1">
 
-                <div className="space-y-2">
+                <section className="space-y-2">
                     <div className="flex items-center gap-2.5">
-                        <h2 className="text-xl font-bold tracking-tight text-text-main">AudioRead</h2>
-                        <span className="text-[10px] font-mono text-primary-rose bg-primary-rose/10 border border-primary-rose/20 px-2 py-0.5 rounded-full">
-                            v1.0.0
+                        <h2 className="text-xl font-bold tracking-tight">
+                            Letrê
+                        </h2>
+
+                        <span className="text-[10px] font-mono text-primary-rose  px-2 py-0.5 rounded-full">
+                            v0.3
                         </span>
                     </div>
 
                     <p className="text-sm text-text-muted leading-relaxed max-w-sm">
-                        Leitor minimalista com síntese de voz e experiência de leitura contínua, sem distrações.
+                        Um leitor de documentos digitais com foco em simplicidade e conforto na leitura.
                     </p>
-                </div>
+                </section>
 
-                <div className="space-y-2">
+                <section className="space-y-2">
                     <span className="text-[11px] font-medium text-text-muted uppercase tracking-wider">
                         Projeto
                     </span>
+
                     <div className="divide-y divide-border-subtle border-t border-b border-border-subtle text-sm">
                         <div className="py-3.5 flex items-center justify-between">
                             <span className="text-text-muted">Desenvolvedor</span>
-                            <span className="text-text-main font-medium">João Paulo</span>
+                            <span className="font-medium">João Paulo</span>
                         </div>
-                        <div className="py-3.5 flex items-center justify-between">
+
+                        <div className="py-3.5 flex items-center justify-between gap-4">
                             <span className="text-text-muted">Tecnologias</span>
-                            <span className="text-primary-rose font-mono text-xs">Next.js • Tailwind CSS</span>
+                            <span className="text-primary-rose font-mono text-xs text-right">
+                                Next.js · Tailwind CSS
+                            </span>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div className="space-y-2">
+                <section className="space-y-2">
                     <span className="text-[11px] font-medium text-text-muted uppercase tracking-wider">
                         Links
                     </span>
+
                     <div className="divide-y divide-border-subtle border-t border-b border-border-subtle text-sm">
                         <a
-                            href="https://github.com"
+                            href="https://github.com/jaozinpaulin/Leaf-Me-2.0"
                             target="_blank"
                             rel="noreferrer"
-                            className="py-3.5 flex items-center justify-between text-text-muted hover:text-text-main transition-colors group cursor-pointer"
+                            className="py-3.5 flex items-center justify-between text-text-muted hover:text-text-main transition-colors group"
                         >
-                            <span>Código Fonte</span>
-                            <ExternalLink className="w-4 h-4 text-text-muted group-hover:text-primary-rose transition-colors" />
+                            <span>Código-fonte</span>
+                            <ExternalLink className="w-4 h-4 group-hover:text-primary-rose transition-colors" />
                         </a>
+
                         <a
                             href="https://okiiji.me"
                             target="_blank"
                             rel="noreferrer"
-                            className="py-3.5 flex items-center justify-between text-text-muted hover:text-text-main transition-colors group cursor-pointer"
+                            className="py-3.5 flex items-center justify-between text-text-muted hover:text-text-main transition-colors group"
                         >
                             <span>Portfólio</span>
-                            <ExternalLink className="w-4 h-4 text-text-muted group-hover:text-primary-rose transition-colors" />
+                            <ExternalLink className="w-4 h-4 group-hover:text-primary-rose transition-colors" />
                         </a>
                     </div>
-                </div>
+                </section>
 
             </div>
-
         </main>
     );
 }
