@@ -1,36 +1,44 @@
-# AudioRead App
+# Letrê
 
-Um leitor de documentos e livros digitais focado em experiencia mobile-first, customizacao visual e conversao de texto em audio.
+Um leitor de documentos digitais desenvolvido com foco em acessibilidade, personalização e uma experiência de leitura confortável em dispositivos móveis.
+
+## Sobre o projeto
+
+O Letrê é uma aplicação web que permite importar e visualizar documentos PDF em uma interface simples e intuitiva. O projeto busca oferecer uma experiência de leitura agradável, com foco na organização dos documentos, na acessibilidade e na evolução contínua dos recursos de leitura.
+
+## Prévia do projeto
+
+### Biblioteca
+
+![Letrê — Biblioteca](public/home.png)
+
+### Leitura
+
+![Letrê — Leitor de PDF](public/reading.png)
+
+## Tecnologias utilizadas
+
+- **Next.js** — estrutura da aplicação com App Router.
+- **TypeScript** — tipagem estática para maior segurança no desenvolvimento.
+- **Tailwind CSS** — estilização e construção da interface.
+- **Zustand** — gerenciamento de estado.
+- **Lucide React** — biblioteca de ícones.
+- **PDF.js** — processamento e visualização de documentos PDF.
+
+## Funcionalidades
+
+- **Biblioteca de documentos:** importação e organização de arquivos PDF.
+- **Leitor integrado:** visualização do conteúdo dos documentos.
+- **Interface responsiva:** experiência adaptada para dispositivos móveis e desktops.
+- **Configurações de leitura:** painel dedicado à personalização da experiência.
+- **Navegação simplificada:** acesso rápido à biblioteca, à leitura e às informações do projeto.
+
+## Desenvolvido por
+
+**João Paulo**
+
+Projeto desenvolvido para portfólio, com foco no aprendizado de Next.js, TypeScript e desenvolvimento front-end.
 
 ---
 
-## Sobre o Projeto
-
-O AudioRead foi desenvolvido para proporcionar uma experiencia de leitura confortável e moderna direto pelo navegador ou dispositivos moveis. O projeto une gerenciamento de arquivos pessoais (PDFs) com recursos avancados de customizacao e acessibilidade.
-
----
-
-## Tecnologias Utilizadas
-
-Este projeto foi construído com ferramentas modernas do ecossistema front-end:
-
-- Next.js (App Router)
-- TypeScript
-- Tailwind CSS (para estilizacao e design system)
-- Zustand (gerenciamento de estado)
-- Lucide React (icones)
-
----
-
-## Principais Funcionalidades
-
-- Design Mobile-First: Interface otimizada e navegacao fluida.
-- Temas Customizaveis: Modo escuro profundo e leitura confortavel.
-- Leitor de PDF Integrado: Visualizacao e navegacao de documentos.
-- Audiobook Assistant: Leitura automatizada de textos por voz.
-
----
-
-## Desenvolvido por **João Paulo**
-
-Projeto criado com foco em portfolio e evolucao técnica em front-end.
+_One commit at a time._
