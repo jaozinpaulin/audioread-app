@@ -20,7 +20,7 @@ export default function ReadingPage() {
         Number(selectedDocument?.pages) || 1,
     );
 
-    const [pageInput, setPageInput] = useState(String(pageCurent));
+    const [pageInput, setPageInput] = useState((pageCurent));
     const [pageError, setPageError] = useState('');
 
     const [paragraphs, setParagraphs] = useState<string[]>([]);
@@ -161,6 +161,10 @@ export default function ReadingPage() {
         readPdf();
     }, [selectedDocument, pageCurent]);
 
+    useEffect(() => {
+        setPageInput(String(pageCurent));
+    }, [pageCurent]);
+
     return (
         <main className="flex-1 flex flex-col justify-between max-w-2xl mx-auto w-full min-h-screen text-zinc-100 px-4">
             <header className="fixed top-0 left-0 right-0 max-w-2xl mx-auto bg-zinc-950/80 backdrop-blur-md px-4 py-3 border-b border-zinc-800/40 flex items-center justify-between shrink-0 z-50">
@@ -207,17 +211,12 @@ export default function ReadingPage() {
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800/40 px-4 py-4 space-y-4 z-50">
-                <div className="flex items-center gap-3">
-                    <div className="relative flex min-w-[90px] flex-col justify-center rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-2.5">
-                        <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                                Page
-                            </span>
 
-                            <span className="text-xs font-semibold text-zinc-400">
-                                / {totalPages}
-                            </span>
-                        </div>
+                <div className="flex items-center gap-3">
+                    <div className="flex min-w-[120px] items-center gap-2 rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-3 py-3">
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                            Page
+                        </span>
 
                         <input
                             type="number"
@@ -234,17 +233,20 @@ export default function ReadingPage() {
                                     handleGoToPage();
                                 }
                             }}
-                            className="w-full bg-transparent text-sm font-semibold text-zinc-200 outline-none"
+                            className="w-10 bg-transparent text-sm font-semibold text-zinc-200 outline-none"
                         />
+
+                        <span className="text-xs text-zinc-500">
+                            / {totalPages}
+                        </span>
                     </div>
 
                     <button
                         type="button"
                         onClick={handleGoToPage}
-                        className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-3 text-xs font-medium text-zinc-200 transition-all hover:border-zinc-700 md:text-sm"
+                        className="flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-3 text-xs font-medium text-zinc-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-700 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-600 md:text-sm"
                     >
-                        <ChevronRight className="h-4 w-4" />
-                        <span>Go to page</span>
+                        Go to page
                     </button>
                 </div>
 
@@ -253,7 +255,6 @@ export default function ReadingPage() {
                         {pageError}
                     </p>
                 )}
-
 
                 <div className="flex items-center justify-between px-6 pt-1">
                     <button
