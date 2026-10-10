@@ -5,17 +5,31 @@ import Link from 'next/link';
 import { ArrowLeft, SlidersHorizontal, ChevronRight, SkipBack, RotateCcw, Play, RotateCw, SkipForward, Scale, } from 'lucide-react';
 import { useDocuments } from '../hooks/useDocuments';
 import * as pdfjsLib from 'pdfjs-dist';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import MenuSettings from '../components/MenuSettings';
 
 
 export default function ReadingPage() {
+    const menuRef = useRef(null);
     const { selectedDocument } = useDocuments();
 
     const [paragraphs, setParagraphs] = useState<string[]>([]);
     const [pageImage, setPageImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        const closeMenuSettings = (evt: MouseEvent) => {
+            if (menuRef && evt.target instanceof Node && !menuRef.current.contains(evt.target)) {
+                setIsOpen(false)
+            }
+        }
+        document.addEventListener("mousedown", closeMenuSettings);
+
+        return () => {
+            document.removeEventListener("mousedown", closeMenuSettings);
+        }
+    }, [])
 
     const [pageCurent, setPageCurrent] = useState(
         Number(selectedDocument?.currentPage) || 1
@@ -139,7 +153,9 @@ export default function ReadingPage() {
                     Reading
                 </h1>
 
-                <div className="relative">
+                <div
+                    ref={menuRef}
+                    className="relative">
                     <MenuSettings isOpen={isOpen} setIsOpen={setIsOpen} />
                 </div>
 
