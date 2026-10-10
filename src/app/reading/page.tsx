@@ -13,6 +13,7 @@ export default function ReadingPage() {
     const [paragraphs, setParagraphs] = useState<string[]>([]);
     const [pageImage, setPageImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     const [pageCurent, setPageCurrent] = useState(
         Number(selectedDocument?.currentPage) || 1
@@ -136,9 +137,50 @@ export default function ReadingPage() {
                     Reading
                 </h1>
 
-                <button className="p-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/50 text-zinc-300 hover:text-zinc-100 hover:border-zinc-700 transition-colors flex items-center justify-center cursor-pointer">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="p-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/50 text-zinc-300 hover:text-zinc-100 hover:border-zinc-700 transition-colors flex items-center justify-center cursor-pointer"
+                >
                     <SlidersHorizontal className="w-5 h-5" />
                 </button>
+
+                {isOpen && (
+                    <div className="fixed top-16 left-4 right-4 z-50 mx-auto max-w-2xl rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-xl">
+                        <h2 className="mb-4 text-sm font-semibold text-zinc-100">
+                            Reading settings
+                        </h2>
+
+                        <div className="space-y-4 text-sm text-zinc-400">
+                            <div>
+                                <p className="mb-1">Accessibility</p>
+                                <p className="text-xs text-zinc-500">
+                                    Reading preferences
+                                </p>
+                            </div>
+
+                            <div>
+                                <p className="mb-1">Orientation</p>
+                                <p className="text-xs text-zinc-500">
+                                    Page layout
+                                </p>
+                            </div>
+
+                            <div>
+                                <p className="mb-1">Appearance</p>
+                                <p className="text-xs text-zinc-500">
+                                    Reading colors
+                                </p>
+                            </div>
+
+                            <div>
+                                <p className="mb-1">Audio</p>
+                                <p className="text-xs text-zinc-500">
+                                    Voice and playback
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </header>
 
             <div className="flex-1 overflow-y-auto pt-20 pb-48">
