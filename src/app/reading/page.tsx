@@ -185,7 +185,7 @@ export default function ReadingPage() {
             </header>
 
             <div className="flex-1 overflow-y-auto pt-20 pb-48">
-                <div className="py-6 text-zinc-300 text-sm md:text-base tracking-wide space-y-4">
+                <div className="py-6 text-zinc-300 text-sm md:text-base tracking-wide space-y-0.5">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center gap-3 py-16">
                             <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-300" />
