@@ -5,11 +5,12 @@
 import { useState } from 'react';
 import { Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { sendTTS } from '../services/tts';
+import { voices } from '../services/tts';
 
 const textSizes = ['Small', 'Medium', 'Large', 'Extra large'];
 const themes = ['System', 'Light', 'Dark'];
 const languages = ['Português', 'English', 'Español'];
-const voices = ['Voice 1', 'Voice 2', 'Voice 3', 'Voice 4'];
+// const voices = ['Voice 1', 'Voice 2', 'Voice 3', 'Voice 4'];
 
 const initialSettings = {
     speed: 1,
@@ -17,8 +18,9 @@ const initialSettings = {
     textSize: 'Small',
     theme: 'System',
     language: 'English',
-    voice: 'Voice 1',
+    voice: 'pt-BR-FranciscaNeural',
 };
+
 
 export default function MenuSettings({ isOpen, setIsOpen }) {
     const [settings, setSettings] = useState(initialSettings);
@@ -48,15 +50,6 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
     const control = 'w-full rounded-lg border border-border-subtle bg-card-bg p-2.5 text-sm outline-none';
     const range = 'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-subtle accent-primary-rose';
     const option = 'w-full rounded-md py-2 text-xs text-center transition-colors';
-
-    const handleTest = async () => {
-        const result = await sendTTS(
-            'Hello world',
-            'en-US-JennyNeutral'
-        );
-
-        console.log(reset)
-    }
 
     return (
         <>
@@ -126,10 +119,6 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
                             </div>
                         </div>
 
-                        <button onClick={handleTest}>
-                            Testar conexão
-                        </button>
-
                         <div>
                             <label className={label}>Appearance</label>
 
@@ -198,24 +187,28 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
                                     className={control}
                                 >
                                     <span className="flex items-center justify-between">
-                                        {settings.voice}
-                                        <ChevronDown size={16} />
+                                        {voices.find((voice) => voice.id === settings.voice)?.name || 'Selecionar voz'}                                        <ChevronDown size={16} />
                                     </span>
                                 </button>
 
                                 {voiceOpen && (
-                                    <div className="absolute bottom-full z-20 mb-1 max-h-36 w-full overflow-y-auto rounded-lg border border-border-subtle bg-card-bg p-1">
+                                    <div className="absolute bottom-full z-20 mb-1 max-h-80 w-full overflow-y-auto rounded-lg border border-border-subtle bg-card-bg p-1">
                                         {voices.map((voice) => (
                                             <button
-                                                key={voice}
+                                                key={voice.id}
                                                 onClick={() => {
-                                                    update('voice', voice);
+                                                    update('voice', voice.id);
                                                     setVoiceOpen(false);
                                                 }}
                                                 className="flex w-full items-center justify-between rounded-md p-2 text-left text-sm hover:bg-card-hover"
                                             >
-                                                {voice}
-                                                {settings.voice === voice && <Check size={14} />}
+
+                                                <div>
+                                                    <p>{voice.name}</p>
+                                                    <p className="text-xs text-text-muted">{voice.language}</p>
+                                                </div>
+
+                                                {settings.voice === voice.id && <Check size={14} />}
                                             </button>
                                         ))}
                                     </div>
