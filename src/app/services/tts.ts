@@ -15,12 +15,15 @@ export async function sendTTS(text: string, voice: string) {
     const response = await fetch('/api/tts', {
         method: 'POST',
         headers: {
-            'Content-type': 'application/json',
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({ text, voice }),
     });
 
-    return response.json();
-}
+    if (!response.ok) {
+        throw new Error('Não foi possível gerar o áudio.');
+    }
 
+    return response.blob();
+}
 //REMOVER OS COMENTARIOS LA DO COMPONESTES 

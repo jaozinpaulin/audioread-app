@@ -51,6 +51,25 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
     const range = 'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-subtle accent-primary-rose';
     const option = 'w-full rounded-md py-2 text-xs text-center transition-colors';
 
+    async function testVoice() {
+        try {
+            const audio = await sendTTS(
+                'Opa meu fi, tranquilo?',
+                settings.voice
+            );
+
+            const audioUrl = URL.createObjectURL(audio);
+            const player = new Audio(audioUrl);
+
+            player.onended = () => URL.revokeObjectURL(audioUrl);
+
+            await player.play();
+        } catch (error) {
+            console.error('Erro ao reproduzir a voz:', error);
+        }
+    }
+
+
     return (
         <>
             <button
@@ -100,6 +119,12 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
                             />
                         </div>
 
+                        <button
+                            onClick={testVoice}
+                            className="mt-2 w-full rounded-lg border border-border-subtle bg-card-bg p-2 text-sm text-text-muted transition-colors hover:bg-card-hover hover:text-text-main"
+                        >
+                            Test voice
+                        </button>
                         <div>
                             <label className={label}>Text size</label>
 
