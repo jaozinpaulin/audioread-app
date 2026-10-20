@@ -12,6 +12,7 @@ import { match } from 'assert';
 export default function ReadingPage() {
     const menuRef = useRef(null);
     const { selectedDocument } = useDocuments();
+    const [selectedVoice, setSelectedVoice] = useState('pt-BR-FranciscaNeural');
 
     const [pageCurent, setPageCurrent] = useState(
         Number(selectedDocument?.currentPage) || 1,
@@ -180,7 +181,7 @@ export default function ReadingPage() {
                 </h1>
 
                 <div ref={menuRef} className="relative">
-                    <MenuSettings isOpen={isOpen} setIsOpen={setIsOpen} />
+                    <MenuSettings isOpen={isOpen} setIsOpen={setIsOpen} onVoiceChange={setSelectedVoice} />
                 </div>
             </header>
 

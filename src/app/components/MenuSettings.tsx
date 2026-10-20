@@ -22,7 +22,7 @@ const initialSettings = {
 };
 
 
-export default function MenuSettings({ isOpen, setIsOpen }) {
+export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
     const [settings, setSettings] = useState(initialSettings);
     const [savedSettings, setSavedSettings] = useState(initialSettings);
     const [languageOpen, setLanguageOpen] = useState(false);
@@ -30,6 +30,10 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
 
     function update(key, value) {
         setSettings((current) => ({ ...current, [key]: value }));
+
+        if (key === 'voice') {
+            onVoiceChange?.(value);
+        }
     }
 
     function reset() {
