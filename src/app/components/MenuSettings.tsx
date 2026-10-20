@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { sendTTS } from '../services/tts';
 
 const textSizes = ['Small', 'Medium', 'Large', 'Extra large'];
 const themes = ['System', 'Light', 'Dark'];
@@ -47,6 +48,15 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
     const control = 'w-full rounded-lg border border-border-subtle bg-card-bg p-2.5 text-sm outline-none';
     const range = 'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-subtle accent-primary-rose';
     const option = 'w-full rounded-md py-2 text-xs text-center transition-colors';
+
+    const handleTest = async () => {
+        const result = await sendTTS(
+            'Hello world',
+            'en-US-JennyNeutral'
+        );
+
+        console.log(reset)
+    }
 
     return (
         <>
@@ -115,6 +125,10 @@ export default function MenuSettings({ isOpen, setIsOpen }) {
                                 ))}
                             </div>
                         </div>
+
+                        <button onClick={handleTest}>
+                            Testar conexão
+                        </button>
 
                         <div>
                             <label className={label}>Appearance</label>
