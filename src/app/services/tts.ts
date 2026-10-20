@@ -23,3 +23,4 @@ export async function sendTTS(text: string, voice: string) {
     return response.json();
 }
 
+//REMOVER OS COMENTARIOS LA DO COMPONESTES 
