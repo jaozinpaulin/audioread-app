@@ -13,6 +13,9 @@ import { sendTTS } from '../services/tts';
 
 export default function ReadingPage() {
     const menuRef = useRef(null);
+    const touchStartX = useRef(0);
+    const touchStartY = useRef(0);
+
     const { selectedDocument } = useDocuments();
     const [selectedVoice, setSelectedVoice] = useState('pt-BR-FranciscaNeural');
 
@@ -257,6 +260,31 @@ export default function ReadingPage() {
     }
 
 
+    const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (event.pointerType === 'mouse') return;
+
+        touchStartX.current = event.clientX;
+        touchStartY.current = event.clientY;
+    };
+
+    const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (event.pointerType === 'mouse') return;
+
+        const differenceX = event.clientX - touchStartX.current;
+        const differenceY = event.clientY - touchStartY.current;
+
+        if (Math.abs(differenceX) < 70) return;
+        if (Math.abs(differenceX) < Math.abs(differenceY)) return;
+
+        if (differenceX < 0) {
+            nextPage();
+        } else {
+            prevPage();
+        }
+    };
+
+
+
     useEffect(() => {
         readPdf();
     }, [selectedDocument, pageCurent]);
@@ -376,7 +404,7 @@ export default function ReadingPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border-subtle bg-card-bg px-3">
+                    <div className="relative flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border-subtle bg-card-bg px-3">
                         <span className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
                             Page
                         </span>
@@ -397,7 +425,7 @@ export default function ReadingPage() {
                                 }
                             }}
                             aria-label="Número da página"
-                            className="w-full min-w-0 text-center text-sm font-medium text-text-main outline-none"
+                            className="absolute inset-0 min-w-0 text-center text-sm font-medium text-text-main outline-none"
                         />
 
                         <span className="ml-auto whitespace-nowrap text-xs text-text-muted">
