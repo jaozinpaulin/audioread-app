@@ -280,28 +280,36 @@ export default function ReadingPage() {
     console.log(currentText)
 
     return (
-        <main className="flex-1 flex flex-col justify-between max-w-2xl mx-auto w-full min-h-screen text-zinc-100 px-4">
-            <header className="fixed top-0 left-0 right-0 max-w-2xl mx-auto bg-zinc-950/80 backdrop-blur-md px-4 py-3 border-b border-zinc-800/40 flex items-center justify-between shrink-0 z-50">
+        <main className="flex min-h-screen w-full max-w-2xl flex-1 flex-col justify-between mx-auto px-4 text-text-main">
+
+            <header className="fixed top-0 left-0 right-0 z-50 mx-auto flex max-w-2xl items-center justify-between border-b border-border-subtle/40 bg-app-bg/90 px-4 py-3 backdrop-blur-md">
+
                 <Link
                     href="/"
-                    className="p-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/50 hover:border-zinc-700 transition-colors text-zinc-300 flex items-center justify-center cursor-pointer"
+                    className="flex cursor-pointer items-center justify-center rounded-xl border border-border-subtle/50 bg-card-bg/40 p-2.5 text-text-muted transition-colors hover:border-border-subtle hover:text-text-main"
                 >
-                    <ArrowLeft className="w-5 h-5 text-zinc-200" />
+                    <ArrowLeft className="h-5 w-5" />
                 </Link>
 
-                <h1 className="font-semibold text-sm md:text-base text-zinc-100 line-clamp-1 px-3 text-center">
+                <h1 className="line-clamp-1 px-3 text-center text-sm font-semibold text-text-main md:text-base">
                     Reading
                 </h1>
 
                 <div ref={menuRef} className="relative">
-                    <MenuSettings isOpen={isOpen} setIsOpen={setIsOpen} onVoiceChange={setSelectedVoice} />
+                    <MenuSettings
+                        isOpen={isOpen}
+                        setIsOpen={setIsOpen}
+                        onVoiceChange={setSelectedVoice}
+                    />
                 </div>
+
             </header>
 
             <div className="flex-1 overflow-y-auto pt-20 pb-48">
-                <div className="py-6 text-zinc-300 text-sm md:text-base tracking-wide space-y-0.5">
+                <div className="space-y-0.5 py-6 text-sm tracking-wide text-text-main md:text-base">
+
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center gap-3 py-16">
+                        <div className="flex flex-col items-center text- justify-center gap-3 py-16">
                             <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-300" />
                         </div>
                     ) : pageImage ? (
@@ -321,10 +329,10 @@ export default function ReadingPage() {
                                         <span
                                             key={sentenceIndex}
                                             className={`rounded transition-colors ${sentenceIndex < currentText
-                                                ? 'text-zinc-500'
+                                                ? 'text-text-muted'
                                                 : sentenceIndex === currentText && isPlaying
-                                                    ? 'bg-accent-crimson/65 text-zinc-100'
-                                                    : 'text-zinc-300'
+                                                    ? 'bg-accent-crimson/65 text-white'
+                                                    : 'text-text-main'
                                                 }`}
                                         >
                                             {sentence}{' '}
@@ -340,9 +348,9 @@ export default function ReadingPage() {
                         </p>
                     )}
                 </div>
-            </div>
+            </div >
 
-            <div className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800/40 px-4 py-4 space-y-4 z-50">
+            <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-2xl space-y-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-4 backdrop-blur-md">
 
                 <div className="space-y-2">
                     <input
@@ -360,8 +368,7 @@ export default function ReadingPage() {
                             }
                         }}
                         disabled={!duration}
-                        className="h-1 w-full cursor-pointer appearance-none rounded-full bg-zinc-800 accent-[#c94f45] disabled:cursor-not-allowed"
-                        aria-label="Progresso do áudio"
+                        className="h-1 w-full cursor-pointer appearance-none rounded-full bg-card-hover accent-accent-crimson disabled:cursor-not-allowed" aria-label="Progresso do áudio"
                     />
 
                     <div className="flex justify-between text-xs text-zinc-500">
@@ -371,10 +378,9 @@ export default function ReadingPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex min-w-[120px] items-center gap-2 rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-3 py-3">
-                        <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                            Page
-                        </span>
+                    <div className="flex min-w-[120px] items-center gap-2 rounded-2xl border border-border-subtle/50 bg-card-bg/40 px-3 py-3">                        <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                        Page
+                    </span>
 
                         <input
                             type="number"
@@ -418,8 +424,8 @@ export default function ReadingPage() {
                         onClick={prevPage}
                         disabled={pageCurent === 1}
                         aria-label="Previous page"
-                        className="cursor-pointer p-2 text-zinc-400 transition-colors hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
+                        className="cursor-pointer p-2 text-text-muted transition-colors hover:text-text-main disabled:cursor-not-allowed disabled:opacity-30"                    >
+
                         <SkipBack className="h-5 w-5" />
                     </button>
 
@@ -435,7 +441,7 @@ export default function ReadingPage() {
                         onClick={playReading}
                         disabled={isGenerating || paragraphs.length === 0}
                         aria-label={isPlaying ? 'Audio playing' : 'Play reading'}
-                        className="flex cursor-pointer items-center justify-center rounded-full bg-accent-crimson p-4 text-white transition-colors hover:bg-[#b0453c] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex cursor-pointer items-center justify-center rounded-full bg-accent-crimson p-4 text-white transition-colors hover:bg-accent-crimson/90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isGenerating ? (
                             <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -449,8 +455,7 @@ export default function ReadingPage() {
                     <button
                         disabled
                         aria-label="Forward audio"
-                        className="cursor-not-allowed p-2 text-zinc-600"
-                    >
+                        className="cursor-not-allowed p-2 text-text-muted opacity-50"                    >
                         <RotateCw className="h-5 w-5" />
                     </button>
 
@@ -458,14 +463,13 @@ export default function ReadingPage() {
                         onClick={nextPage}
                         disabled={pageCurent === totalPages}
                         aria-label="Next page"
-                        className="cursor-pointer p-2 text-zinc-400 transition-colors hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
+                        className="cursor-pointer p-2 text-text-muted transition-colors hover:text-text-main disabled:cursor-not-allowed disabled:opacity-30"                    >
                         <SkipForward className="h-5 w-5" />
                     </button>
                 </div>
 
 
             </div>
-        </main>
+        </main >
     );
 }
