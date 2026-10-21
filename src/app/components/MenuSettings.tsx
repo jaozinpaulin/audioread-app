@@ -200,7 +200,7 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
                                     </button>
 
                                     {languageOpen && (
-                                        <div className="absolute top-full z-30 mt-1 w-full rounded-lg border border-border-subtle bg-card-bg p-1 shadow-xl">
+                                        <div className="absolute bottom-full z-30 mb-1 w-full rounded-lg border border-border-subtle bg-card-bg p-1 shadow-xl">
                                             {languages.map((language) => (
                                                 <button
                                                     key={language.code}
@@ -255,7 +255,7 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
                                     </button>
 
                                     {voiceOpen && (
-                                        <div className="absolute bottom-full z-30 mb-1 max-h-52 w-full overflow-y-auto rounded-lg border border-border-subtle bg-card-bg p-1 shadow-xl">
+                                        <div className="absolute bottom-full z-30 mb-1 max-h-80 w-full overflow-y-auto rounded-lg border border-border-subtle bg-card-bg p-1 shadow-xl">
                                             {filteredVoices.map((voice) => (
                                                 <button
                                                     key={voice.id}
