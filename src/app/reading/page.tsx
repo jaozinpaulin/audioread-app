@@ -331,7 +331,7 @@ export default function ReadingPage() {
                                             className={`rounded transition-colors ${sentenceIndex < currentText
                                                 ? 'text-text-muted'
                                                 : sentenceIndex === currentText && isPlaying
-                                                    ? 'bg-accent-crimson/65 text-white'
+                                                    ? 'bg-primary-rose/90 text-white'
                                                     : 'text-text-main'
                                                 }`}
                                         >
@@ -353,34 +353,33 @@ export default function ReadingPage() {
             <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-2xl space-y-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-4 backdrop-blur-md">
 
                 <div className="space-y-2">
-                    <input
-                        type="range"
-                        min={0}
-                        max={duration || 0}
-                        step={0.1}
-                        value={Math.min(currentTime, duration || 0)}
-                        onChange={(event) => {
-                            const time = Number(event.target.value);
-
-                            if (audioRef.current) {
-                                audioRef.current.currentTime = time;
-                                setCurrentTime(time);
-                            }
-                        }}
-                        disabled={!duration}
-                        className="h-1 w-full cursor-pointer appearance-none rounded-full bg-card-hover accent-accent-crimson disabled:cursor-not-allowed" aria-label="Progresso do áudio"
-                    />
-
-                    <div className="flex justify-between text-xs text-zinc-500">
+                    <div
+                        className="h-1 w-full overflow-hidden rounded-full bg-card-hover"
+                        role="progressbar"
+                        aria-label="Progresso do áudio"
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={duration ? Math.round((currentTime / duration) * 100) : 0}
+                    >
+                        <div
+                            className="h-full rounded-full bg-accent-crimson transition-[width] duration-200"
+                            style={{
+                                width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+                            }}
+                        />
+                    </div>
+                    {/* 
+                    <div className="flex justify-between text-xs text-text-muted">
                         <span>{formatTime(currentTime)}</span>
                         <span>{formatTime(duration)}</span>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex min-w-[120px] items-center gap-2 rounded-2xl border border-border-subtle/50 bg-card-bg/40 px-3 py-3">                        <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                        Page
-                    </span>
+                    <div className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border-subtle bg-card-bg px-3">
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                            Page
+                        </span>
 
                         <input
                             type="number"
@@ -397,10 +396,11 @@ export default function ReadingPage() {
                                     handleGoToPage();
                                 }
                             }}
-                            className="w-10 bg-transparent text-sm font-semibold text-zinc-200 outline-none"
+                            aria-label="Número da página"
+                            className="w-full min-w-0 text-center text-sm font-medium text-text-main outline-none"
                         />
 
-                        <span className="text-xs text-zinc-500">
+                        <span className="ml-auto whitespace-nowrap text-xs text-text-muted">
                             / {totalPages}
                         </span>
                     </div>
@@ -408,11 +408,12 @@ export default function ReadingPage() {
                     <button
                         type="button"
                         onClick={handleGoToPage}
-                        className="flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-4 py-3 text-xs font-medium text-zinc-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-700 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-600 md:text-sm"
+                        className="flex h-11 flex-1 cursor-pointer items-center justify-center rounded-xl border border-border-subtle bg-card-hover px-3 text-xs font-medium text-text-main transition-colors hover:border-primary-rose hover:bg-card-bg sm:text-sm"
                     >
                         Go to page
                     </button>
                 </div>
+
 
                 {pageError && (
                     <p role="alert" className="mt-2 text-xs text-red-400">

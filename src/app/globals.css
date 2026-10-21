@@ -57,11 +57,14 @@
   --app-bg: #f4f4f5;
   --card-bg: #ffffff;
   --card-hover: #e4e4e7;
-  --primary-rose: #b8453b;
-  --accent-crimson: #b83b30;
+
+  --primary-rose: #dd776c;
+  --accent-crimson: #eb6c60;
+
   --text-main: #18181b;
   --text-muted: #52525b;
   --border-subtle: #c4c4cc;
+
   --scrollbar-thumb: #c4c4cc;
   --scrollbar-hover: #a1a1aa;
 }
