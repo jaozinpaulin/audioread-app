@@ -17,6 +17,7 @@ export default function ReadingPage() {
     const [selectedVoice, setSelectedVoice] = useState('pt-BR-FranciscaNeural');
 
     const [currentTime, setCurrentTime] = useState(0);
+    const [currentText, setCurrentText] = useState(0);
     const [duration, setDuration] = useState(0);
 
     const [isPlaying, setIsPlaying] = useState(false);
@@ -168,6 +169,26 @@ export default function ReadingPage() {
     };
 
 
+
+    function getCurrentTextIndex(text: string, progress: number) {
+        const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+        const totalCharacters = sentences.reduce((total, sentence) => total + sentence.length, 0);
+        const currentCharacter = Math.floor(totalCharacters * progress);
+
+        let characterCount = 0;
+
+        for (let index = 0; index < sentences.length; index++) {
+            characterCount += sentences[index].length;
+
+            if (currentCharacter < characterCount) {
+                return index;
+            }
+        }
+
+        return Math.max(sentences.length - 1, 0);
+    }
+
+
     async function playReading() {
         if (isGenerating || paragraphs.length === 0) return;
 
@@ -195,6 +216,13 @@ export default function ReadingPage() {
 
             player.ontimeupdate = () => {
                 setCurrentTime(player.currentTime);
+
+                if (player.duration) {
+                    const progress = player.currentTime / player.duration;
+                    const text = paragraphs.join(' ');
+
+                    setCurrentText(getCurrentTextIndex(text, progress));
+                }
             };
 
             player.onloadedmetadata = () => {
@@ -249,6 +277,8 @@ export default function ReadingPage() {
     }, [pageCurent]);
 
 
+    console.log(currentText)
+
     return (
         <main className="flex-1 flex flex-col justify-between max-w-2xl mx-auto w-full min-h-screen text-zinc-100 px-4">
             <header className="fixed top-0 left-0 right-0 max-w-2xl mx-auto bg-zinc-950/80 backdrop-blur-md px-4 py-3 border-b border-zinc-800/40 flex items-center justify-between shrink-0 z-50">
@@ -281,11 +311,29 @@ export default function ReadingPage() {
                             className="w-full h-auto rounded-lg"
                         />
                     ) : paragraphs.length > 0 ? (
-                        paragraphs.map((p, index) => (
-                            <p key={index} className="leading-relaxed">
-                                {p}
-                            </p>
-                        ))
+
+                        paragraphs.map((p, index) => {
+                            const sentences = p.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
+
+                            return (
+                                <p key={index} className="leading-relaxed">
+                                    {sentences.map((sentence, sentenceIndex) => (
+                                        <span
+                                            key={sentenceIndex}
+                                            className={`rounded transition-colors ${sentenceIndex < currentText
+                                                ? 'text-zinc-500'
+                                                : sentenceIndex === currentText && isPlaying
+                                                    ? 'bg-accent-crimson/65 text-zinc-100'
+                                                    : 'text-zinc-300'
+                                                }`}
+                                        >
+                                            {sentence}{' '}
+                                        </span>
+                                    ))}
+                                </p>
+                            );
+                        })
+
                     ) : (
                         <p className="py-16 text-center text-sm text-zinc-500">
                             Nenhum conteúdo disponível.
