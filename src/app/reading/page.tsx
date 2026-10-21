@@ -101,8 +101,8 @@ export default function ReadingPage() {
         return canvas.toDataURL('image/jpeg', 0.85);
     };
 
-    const readPdf = async () => {
-        if (!selectedDocument) return;
+    const readPdf = async (pageNumber = pageCurent) => {
+        if (!selectedDocument) return null;
 
         setIsLoading(true);
         setPageImage(null);
@@ -113,10 +113,9 @@ export default function ReadingPage() {
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-            const page = await pdf.getPage(pageCurent);
+            const page = await pdf.getPage(pageNumber);
             const textContent = await page.getTextContent();
             const linesMap = new Map();
-
 
             textContent.items.forEach((item) => {
                 if (!('str' in item) || !item.str.trim()) return;
@@ -130,17 +129,14 @@ export default function ReadingPage() {
                 linesMap.get(y).push({
                     x: item.transform[4],
                     text: item.str,
-                    fontSize: Math.abs(item.transform[3]),
                 });
             });
-
 
             const sortedY = Array.from(linesMap.keys()).sort((a, b) => b - a);
             const lines = [];
 
             sortedY.forEach((y) => {
                 const lineItems = linesMap.get(y).sort((a, b) => a.x - b.x);
-
                 const lineText = lineItems
                     .map((item) => item.text)
                     .join(' ')
@@ -151,15 +147,21 @@ export default function ReadingPage() {
 
             const fullText = lines.join(' ').replace(/\s+/g, ' ').trim();
 
-            if (!fullText) {
+            setTotalPages(pdf.numPages);
+
+            if (!fullText && pageNumber === pageCurent) {
                 const image = await renderPageImage(page);
                 setPageImage(image ?? null);
             }
 
-            setParagraphs(fullText ? [fullText] : []);
-            setTotalPages(pdf.numPages);
+            if (pageNumber === pageCurent) {
+                setParagraphs(fullText ? [fullText] : []);
+            }
+
+            return fullText;
         } catch (error) {
             console.error('Erro ao ler o PDF:', error);
+            return null;
         } finally {
             setIsLoading(false);
         }
