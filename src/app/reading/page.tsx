@@ -16,6 +16,9 @@ export default function ReadingPage() {
     const { selectedDocument } = useDocuments();
     const [selectedVoice, setSelectedVoice] = useState('pt-BR-FranciscaNeural');
 
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+
     const [isPlaying, setIsPlaying] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -35,6 +38,15 @@ export default function ReadingPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
+
+    function formatTime(time: number) {
+        if (!Number.isFinite(time)) return '0:00';
+
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
 
 
     useEffect(() => {
@@ -161,6 +173,9 @@ export default function ReadingPage() {
             if (audioRef.current.paused) {
                 await audioRef.current.play();
                 setIsPlaying(true);
+            } else {
+                audioRef.current.pause();
+                setIsPlaying(false);
             }
 
             return;
@@ -176,15 +191,29 @@ export default function ReadingPage() {
 
             audioRef.current = player;
 
+            player.ontimeupdate = () => {
+                setCurrentTime(player.currentTime);
+            };
+
+            player.onloadedmetadata = () => {
+                setDuration(player.duration);
+            };
+
             player.onended = () => {
                 URL.revokeObjectURL(audioUrl);
                 audioRef.current = null;
+
+                setCurrentTime(0);
+                setDuration(0);
                 setIsPlaying(false);
             };
 
             player.onerror = () => {
                 URL.revokeObjectURL(audioUrl);
                 audioRef.current = null;
+
+                setCurrentTime(0);
+                setDuration(0);
                 setIsPlaying(false);
             };
 
@@ -264,6 +293,32 @@ export default function ReadingPage() {
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800/40 px-4 py-4 space-y-4 z-50">
+
+                <div className="space-y-2">
+                    <input
+                        type="range"
+                        min={0}
+                        max={duration || 0}
+                        step={0.1}
+                        value={Math.min(currentTime, duration || 0)}
+                        onChange={(event) => {
+                            const time = Number(event.target.value);
+
+                            if (audioRef.current) {
+                                audioRef.current.currentTime = time;
+                                setCurrentTime(time);
+                            }
+                        }}
+                        disabled={!duration}
+                        className="h-1 w-full cursor-pointer appearance-none rounded-full bg-zinc-800 accent-[#c94f45] disabled:cursor-not-allowed"
+                        aria-label="Progresso do áudio"
+                    />
+
+                    <div className="flex justify-between text-xs text-zinc-500">
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
+                    </div>
+                </div>
 
                 <div className="flex items-center gap-3">
                     <div className="flex min-w-[120px] items-center gap-2 rounded-2xl border border-zinc-800/50 bg-zinc-900/40 px-3 py-3">
