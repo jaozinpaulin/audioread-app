@@ -1,16 +1,18 @@
 // @ts-nocheck
-
 'use client';
 
 import { useState } from 'react';
 import { Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { sendTTS } from '../services/tts';
-import { voices } from '../services/tts';
+import { sendTTS, voices } from '../services/tts';
 
 const textSizes = ['Small', 'Medium', 'Large', 'Extra large'];
 const themes = ['System', 'Light', 'Dark'];
-const languages = ['Português', 'English', 'Español'];
-// const voices = ['Voice 1', 'Voice 2', 'Voice 3', 'Voice 4'];
+
+const languages = [
+    { name: 'Português', code: 'Portuguese' },
+    { name: 'English', code: 'English' },
+    { name: 'Español', code: 'Spanish' },
+];
 
 const initialSettings = {
     speed: 1,
@@ -18,15 +20,20 @@ const initialSettings = {
     textSize: 'Small',
     theme: 'System',
     language: 'English',
-    voice: 'pt-BR-FranciscaNeural',
+    voice: 'en-US-JennyNeural',
 };
-
 
 export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
     const [settings, setSettings] = useState(initialSettings);
     const [savedSettings, setSavedSettings] = useState(initialSettings);
     const [languageOpen, setLanguageOpen] = useState(false);
     const [voiceOpen, setVoiceOpen] = useState(false);
+
+    const languageCode = languages.find(
+        (language) => language.name === settings.language
+    )?.code;
+
+    const filteredVoices = voices[languageCode] || [];
 
     function update(key, value) {
         setSettings((current) => ({ ...current, [key]: value }));
@@ -38,10 +45,16 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
 
     function reset() {
         setSettings({ ...initialSettings });
+        onVoiceChange?.(initialSettings.voice);
+        setLanguageOpen(false);
+        setVoiceOpen(false);
     }
 
     function cancel() {
         setSettings({ ...savedSettings });
+        onVoiceChange?.(savedSettings.voice);
+        setLanguageOpen(false);
+        setVoiceOpen(false);
         setIsOpen(false);
     }
 
@@ -51,28 +64,38 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
     }
 
     const label = 'mb-2 block text-xs text-text-muted';
-    const control = 'w-full rounded-lg border border-border-subtle bg-card-bg p-2.5 text-sm outline-none';
-    const range = 'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-subtle accent-primary-rose';
+
+    const control =
+        'w-full rounded-lg border border-border-subtle bg-card-bg p-2.5 text-sm outline-none';
+
+    const range =
+        'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-subtle accent-primary-rose';
+
     const option = 'w-full rounded-md py-2 text-xs text-center transition-colors';
 
-    async function testVoice() {
-        try {
-            const audio = await sendTTS(
-                'Opa meu fi, tranquilo?',
-                settings.voice
-            );
+    // async function testVoice() {
+    //     let audioUrl;
 
-            const audioUrl = URL.createObjectURL(audio);
-            const player = new Audio(audioUrl);
+    //     try {
+    //         const audio = await sendTTS(
+    //             'Hello! This is a voice test.',
+    //             settings.voice
+    //         );
 
-            player.onended = () => URL.revokeObjectURL(audioUrl);
+    //         audioUrl = URL.createObjectURL(audio);
 
-            await player.play();
-        } catch (error) {
-            console.error('Erro ao reproduzir a voz:', error);
-        }
-    }
+    //         const player = new Audio(audioUrl);
 
+    //         player.onended = () => URL.revokeObjectURL(audioUrl);
+    //         player.onerror = () => URL.revokeObjectURL(audioUrl);
+
+    //         await player.play();
+    //     } catch (error) {
+    //         if (audioUrl) URL.revokeObjectURL(audioUrl);
+
+    //         console.error('Erro ao reproduzir a voz:', error);
+    //     }
+    // }
 
     return (
         <>
@@ -102,7 +125,9 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
                                 max="2"
                                 step="0.1"
                                 value={settings.speed}
-                                onChange={(e) => update('speed', Number(e.target.value))}
+                                onChange={(e) =>
+                                    update('speed', Number(e.target.value))
+                                }
                                 className={range}
                             />
                         </div>
@@ -118,17 +143,20 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
                                 max="2"
                                 step="0.1"
                                 value={settings.pitch}
-                                onChange={(e) => update('pitch', Number(e.target.value))}
+                                onChange={(e) =>
+                                    update('pitch', Number(e.target.value))
+                                }
                                 className={range}
                             />
                         </div>
-
+                        {/* 
                         <button
                             onClick={testVoice}
                             className="mt-2 w-full rounded-lg border border-border-subtle bg-card-bg p-2 text-sm text-text-muted transition-colors hover:bg-card-hover hover:text-text-main"
                         >
                             Test voice
-                        </button>
+                        </button> */}
+
                         <div>
                             <label className={label}>Text size</label>
 
@@ -188,15 +216,33 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
                                     <div className="absolute top-full z-20 mt-1 w-full rounded-lg border border-border-subtle bg-card-bg p-1">
                                         {languages.map((language) => (
                                             <button
-                                                key={language}
+                                                key={language.code}
                                                 onClick={() => {
-                                                    update('language', language);
+                                                    const firstVoice =
+                                                        voices[language.code]?.[0];
+
+                                                    update(
+                                                        'language',
+                                                        language.name
+                                                    );
+
+                                                    if (firstVoice) {
+                                                        update(
+                                                            'voice',
+                                                            firstVoice.id
+                                                        );
+                                                    }
+
                                                     setLanguageOpen(false);
                                                 }}
                                                 className="flex w-full items-center justify-between rounded-md p-2 text-left text-sm hover:bg-card-hover"
                                             >
-                                                {language}
-                                                {settings.language === language && <Check size={14} />}
+                                                {language.name}
+
+                                                {settings.language ===
+                                                    language.name && (
+                                                        <Check size={14} />
+                                                    )}
                                             </button>
                                         ))}
                                     </div>
@@ -215,14 +261,21 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
                                     }}
                                     className={control}
                                 >
-                                    <span className="flex items-center justify-between">
-                                        {voices.find((voice) => voice.id === settings.voice)?.name || 'Selecionar voz'}                                        <ChevronDown size={16} />
+                                    <span className="flex items-center justify-between gap-2">
+                                        <span>
+                                            {filteredVoices.find(
+                                                (voice) =>
+                                                    voice.id === settings.voice
+                                            )?.name || 'Select voice'}
+                                        </span>
+
+                                        <ChevronDown size={16} />
                                     </span>
                                 </button>
 
                                 {voiceOpen && (
                                     <div className="absolute bottom-full z-20 mb-1 max-h-80 w-full overflow-y-auto rounded-lg border border-border-subtle bg-card-bg p-1">
-                                        {voices.map((voice) => (
+                                        {filteredVoices.map((voice) => (
                                             <button
                                                 key={voice.id}
                                                 onClick={() => {
@@ -231,13 +284,12 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
                                                 }}
                                                 className="flex w-full items-center justify-between rounded-md p-2 text-left text-sm hover:bg-card-hover"
                                             >
+                                                <span>{voice.name}</span>
 
-                                                <div>
-                                                    <p>{voice.name}</p>
-                                                    <p className="text-xs text-text-muted">{voice.language}</p>
-                                                </div>
-
-                                                {settings.voice === voice.id && <Check size={14} />}
+                                                {settings.voice ===
+                                                    voice.id && (
+                                                        <Check size={14} />
+                                                    )}
                                             </button>
                                         ))}
                                     </div>
@@ -274,6 +326,4 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
             )}
         </>
     );
-
-
 }

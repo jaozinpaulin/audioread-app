@@ -2,17 +2,23 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, SlidersHorizontal, ChevronRight, SkipBack, RotateCcw, Play, RotateCw, SkipForward, Scale, } from 'lucide-react';
+import { ArrowLeft, SlidersHorizontal, ChevronRight, SkipBack, RotateCcw, Play, Pause, RotateCw, SkipForward, Scale, } from 'lucide-react';
 import { useDocuments } from '../hooks/useDocuments';
+
 import * as pdfjsLib from 'pdfjs-dist';
 import { useEffect, useState, useRef } from 'react';
 import MenuSettings from '../components/MenuSettings';
 import { match } from 'assert';
+import { sendTTS } from '../services/tts';
 
 export default function ReadingPage() {
     const menuRef = useRef(null);
     const { selectedDocument } = useDocuments();
     const [selectedVoice, setSelectedVoice] = useState('pt-BR-FranciscaNeural');
+
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const [pageCurent, setPageCurrent] = useState(
         Number(selectedDocument?.currentPage) || 1,
@@ -158,6 +164,50 @@ export default function ReadingPage() {
         }
     };
 
+    async function playReading() {
+        if (isGenerating || paragraphs.length === 0) return;
+
+        if (audioRef.current) {
+            if (audioRef.current.paused) {
+                await audioRef.current.play();
+                setIsPlaying(true);
+            }
+
+            return;
+        }
+
+        setIsGenerating(true);
+
+        try {
+            const text = paragraphs.join(' ');
+            const audio = await sendTTS(text, selectedVoice);
+            const audioUrl = URL.createObjectURL(audio);
+            const player = new Audio(audioUrl);
+
+            audioRef.current = player;
+
+            player.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                audioRef.current = null;
+                setIsPlaying(false);
+            };
+
+            player.onerror = () => {
+                URL.revokeObjectURL(audioUrl);
+                audioRef.current = null;
+                setIsPlaying(false);
+            };
+
+            await player.play();
+            setIsPlaying(true);
+        } catch (error) {
+            console.error('Erro ao reproduzir a leitura:', error);
+        } finally {
+            setIsGenerating(false);
+        }
+    }
+
+
     useEffect(() => {
         readPdf();
     }, [selectedDocument, pageCurent]);
@@ -165,6 +215,18 @@ export default function ReadingPage() {
     useEffect(() => {
         setPageInput(String(pageCurent));
     }, [pageCurent]);
+
+    useEffect(() => {
+        const player = audioRef.current;
+
+        if (player) {
+            player.pause();
+            player.currentTime = 0;
+            audioRef.current = null;
+            setIsPlaying(false);
+        }
+    }, [pageCurent]);
+
 
     return (
         <main className="flex-1 flex flex-col justify-between max-w-2xl mx-auto w-full min-h-screen text-zinc-100 px-4">
@@ -256,36 +318,58 @@ export default function ReadingPage() {
                         {pageError}
                     </p>
                 )}
-
                 <div className="flex items-center justify-between px-6 pt-1">
                     <button
                         onClick={prevPage}
                         disabled={pageCurent === 1}
-                        className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Previous page"
+                        className="cursor-pointer p-2 text-zinc-400 transition-colors hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-30"
                     >
-                        <SkipBack className="w-5 h-5" />
+                        <SkipBack className="h-5 w-5" />
                     </button>
 
-                    <button className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer">
-                        <RotateCcw className="w-5 h-5" />
+                    <button
+                        disabled
+                        aria-label="Rewind audio"
+                        className="cursor-not-allowed p-2 text-zinc-600"
+                    >
+                        <RotateCcw className="h-5 w-5" />
                     </button>
 
-                    <button className="p-4 rounded-full bg-accent-crimson hover:bg-[#b0453c] text-white transition-all cursor-pointer flex items-center justify-center">
-                        <Play className="w-6 h-6 fill-current ml-0.5" />
+                    <button
+                        onClick={playReading}
+                        disabled={isGenerating || paragraphs.length === 0}
+                        aria-label={isPlaying ? 'Audio playing' : 'Play reading'}
+                        className="flex cursor-pointer items-center justify-center rounded-full bg-accent-crimson p-4 text-white transition-colors hover:bg-[#b0453c] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {isGenerating ? (
+                            <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        ) : isPlaying ? (
+                            <Pause className="h-6 w-6 fill-current" />
+                        ) : (
+                            <Play className="ml-0.5 h-6 w-6 fill-current" />
+                        )}
                     </button>
 
-                    <button className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer">
-                        <RotateCw className="w-5 h-5" />
+                    <button
+                        disabled
+                        aria-label="Forward audio"
+                        className="cursor-not-allowed p-2 text-zinc-600"
+                    >
+                        <RotateCw className="h-5 w-5" />
                     </button>
 
                     <button
                         onClick={nextPage}
                         disabled={pageCurent === totalPages}
-                        className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Next page"
+                        className="cursor-pointer p-2 text-zinc-400 transition-colors hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-30"
                     >
-                        <SkipForward className="w-5 h-5" />
+                        <SkipForward className="h-5 w-5" />
                     </button>
                 </div>
+
+
             </div>
         </main>
     );
