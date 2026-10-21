@@ -171,7 +171,18 @@ export default function ReadingPage() {
         }
     };
 
+    function skipAudio(seconds: number) {
+        const player = audioRef.current;
 
+        if (!player) return;
+
+        const newTime = Math.max(0, Math.min(
+            player.currentTime + seconds, player.duration || 0)
+        );
+
+        player.currentTime = newTime;
+        setCurrentTime(newTime);
+    }
 
     function getCurrentTextIndex(text: string, progress: number) {
         const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
@@ -258,32 +269,6 @@ export default function ReadingPage() {
             setIsGenerating(false);
         }
     }
-
-
-    const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-        if (event.pointerType === 'mouse') return;
-
-        touchStartX.current = event.clientX;
-        touchStartY.current = event.clientY;
-    };
-
-    const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-        if (event.pointerType === 'mouse') return;
-
-        const differenceX = event.clientX - touchStartX.current;
-        const differenceY = event.clientY - touchStartY.current;
-
-        if (Math.abs(differenceX) < 70) return;
-        if (Math.abs(differenceX) < Math.abs(differenceY)) return;
-
-        if (differenceX < 0) {
-            nextPage();
-        } else {
-            prevPage();
-        }
-    };
-
-
 
     useEffect(() => {
         readPdf();
@@ -396,11 +381,7 @@ export default function ReadingPage() {
                             }}
                         />
                     </div>
-                    {/* 
-                    <div className="flex justify-between text-xs text-text-muted">
-                        <span>{formatTime(currentTime)}</span>
-                        <span>{formatTime(duration)}</span>
-                    </div> */}
+
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -459,11 +440,15 @@ export default function ReadingPage() {
                     </button>
 
                     <button
-                        disabled
-                        aria-label="Rewind audio"
-                        className="cursor-not-allowed p-2 text-zinc-600"
+                        onClick={() => skipAudio(-15)}
+                        aria-label="Voltar 15 segundos"
+                        title="Voltar 15 segundos"
+                        className="flex cursor-pointer items-center gap-1 p-2 text-text-muted transition-colors hover:text-text-main"
                     >
-                        <RotateCcw className="h-5 w-5" />
+                        <span className="relative flex items-center justify-center">
+                            <RotateCcw className="h-6 w-6" />
+                            <span className="absolute text-[8px] font-semibold">15</span>
+                        </span>
                     </button>
 
                     <button
@@ -482,10 +467,15 @@ export default function ReadingPage() {
                     </button>
 
                     <button
-                        disabled
-                        aria-label="Forward audio"
-                        className="cursor-not-allowed p-2 text-text-muted opacity-50"                    >
-                        <RotateCw className="h-5 w-5" />
+                        onClick={() => skipAudio(15)}
+                        aria-label="Avançar 15 segundos"
+                        title="Avançar 15 segundos"
+                        className="flex cursor-pointer items-center gap-1 p-2 text-text-muted transition-colors hover:text-text-main"
+                    >
+                        <span className="relative flex items-center justify-center">
+                            <RotateCw className="h-6 w-6" />
+                            <span className="absolute text-[8px] font-semibold">15</span>
+                        </span>
                     </button>
 
                     <button
