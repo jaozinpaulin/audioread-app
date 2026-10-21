@@ -93,69 +93,58 @@ export default function ReadingPage() {
         if (!selectedDocument) return;
 
         setIsLoading(true);
-
         setPageImage(null);
         setParagraphs([]);
 
         try {
             const file = selectedDocument.file;
             const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer })
-                .promise;
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
             const page = await pdf.getPage(pageCurent);
             const textContent = await page.getTextContent();
-
             const linesMap = new Map();
 
+
             textContent.items.forEach((item) => {
-                if ('str' in item && item.str.trim()) {
-                    const y = Math.round(item.transform[5]);
-                    if (!linesMap.has(y)) linesMap.set(y, []);
-                    linesMap
-                        .get(y)
-                        .push({ x: item.transform[4], text: item.str });
+                if (!('str' in item) || !item.str.trim()) return;
+
+                const y = Math.round(item.transform[5]);
+
+                if (!linesMap.has(y)) {
+                    linesMap.set(y, []);
                 }
+
+                linesMap.get(y).push({
+                    x: item.transform[4],
+                    text: item.str,
+                    fontSize: Math.abs(item.transform[3]),
+                });
             });
 
+
             const sortedY = Array.from(linesMap.keys()).sort((a, b) => b - a);
-            const extractedParagraphs: string[] = [];
-            let currentParagraph = '';
-            let lastY: number | null = null;
+            const lines = [];
 
             sortedY.forEach((y) => {
                 const lineItems = linesMap.get(y).sort((a, b) => a.x - b.x);
+
                 const lineText = lineItems
                     .map((item) => item.text)
                     .join(' ')
                     .trim();
 
-                if (!lineText) return;
-
-                const isNewParagraph = lastY !== null && lastY - y > 18;
-
-                if (isNewParagraph && currentParagraph) {
-                    extractedParagraphs.push(currentParagraph.trim());
-                    currentParagraph = lineText;
-                } else {
-                    currentParagraph = currentParagraph
-                        ? `${currentParagraph} ${lineText}`
-                        : lineText;
-                }
-
-                lastY = y;
+                if (lineText) lines.push(lineText);
             });
 
-            if (currentParagraph) {
-                extractedParagraphs.push(currentParagraph.trim());
-            }
+            const fullText = lines.join(' ').replace(/\s+/g, ' ').trim();
 
-            if (extractedParagraphs.length === 0) {
+            if (!fullText) {
                 const image = await renderPageImage(page);
                 setPageImage(image ?? null);
             }
 
-            setParagraphs(extractedParagraphs);
+            setParagraphs(fullText ? [fullText] : []);
             setTotalPages(pdf.numPages);
         } catch (error) {
             console.error('Erro ao ler o PDF:', error);
@@ -163,6 +152,7 @@ export default function ReadingPage() {
             setIsLoading(false);
         }
     };
+
 
     async function playReading() {
         if (isGenerating || paragraphs.length === 0) return;
