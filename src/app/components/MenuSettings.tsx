@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { sendTTS, voices } from '../services/tts';
 
@@ -43,8 +43,16 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
         }
     }
 
+    function applyTheme(theme) {
+        document.documentElement.dataset.theme = theme.toLowerCase();
+    }
+    useEffect(() => {
+        document.documentElement.dataset.theme = settings.theme.toLowerCase();
+    }, [settings.theme]);
+
     function reset() {
         setSettings({ ...initialSettings });
+        applyTheme(initialSettings.theme);
         onVoiceChange?.(initialSettings.voice);
         setLanguageOpen(false);
         setVoiceOpen(false);
@@ -52,6 +60,7 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
 
     function cancel() {
         setSettings({ ...savedSettings });
+        applyTheme(savedSettings.theme);
         onVoiceChange?.(savedSettings.voice);
         setLanguageOpen(false);
         setVoiceOpen(false);
@@ -60,6 +69,7 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
 
     function save() {
         setSavedSettings({ ...settings });
+        applyTheme(settings.theme);
         setIsOpen(false);
     }
 
@@ -96,6 +106,8 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
     //         console.error('Erro ao reproduzir a voz:', error);
     //     }
     // }
+
+
 
     return (
         <>

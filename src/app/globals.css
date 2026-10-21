@@ -3,26 +3,89 @@
 @theme {
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 
-  --color-app-bg: #09090b;
-  --color-card-bg: #121215;
-  --color-card-hover: #18181b;
-  --color-primary-rose: #E2847A;
-  --color-accent-crimson: #C75146;
-  --color-text-main: #FDF8F8;
-  --color-text-muted: #A1A1AA;
-  --color-border-subtle: #27272a;
+  --color-app-bg: var(--app-bg);
+  --color-card-bg: var(--card-bg);
+  --color-card-hover: var(--card-hover);
+
+  --color-primary-rose: var(--primary-rose);
+  --color-accent-crimson: var(--accent-crimson);
+
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-border-subtle: var(--border-subtle);
 }
 
-:root {
+:root,
+[data-theme="system"] {
   color-scheme: dark;
+
+  --app-bg: #18181b;
+  --card-bg: #202024;
+  --card-hover: #27272a;
+
+  --primary-rose: #e2847a;
+  --accent-crimson: #c75146;
+
+  --text-main: #fafafa;
+  --text-muted: #a1a1aa;
+  --border-subtle: #3f3f46;
+
+  --scrollbar-thumb: #3f3f46;
+  --scrollbar-hover: #52525b;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --app-bg: #09090b;
+  --card-bg: #121215;
+  --card-hover: #18181b;
+
+  --primary-rose: #e2847a;
+  --accent-crimson: #c75146;
+
+  --text-main: #fdf8f8;
+  --text-muted: #a1a1aa;
+  --border-subtle: #27272a;
+
+  --scrollbar-thumb: #27272a;
+  --scrollbar-hover: #3f3f46;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --app-bg: #f4f4f5;
+  --card-bg: #ffffff;
+  --card-hover: #e4e4e7;
+
+  --primary-rose: #c75146;
+  --accent-crimson: #a83e35;
+
+  --text-main: #18181b;
+  --text-muted: #71717a;
+  --border-subtle: #d4d4d8;
+
+  --scrollbar-thumb: #d4d4d8;
+  --scrollbar-hover: #a1a1aa;
 }
 
 html,
 body {
-  background-color: var(--color-app-bg);
-  color: var(--color-text-main);
-  font-family: var(--font-sans);
+  min-height: 100%;
   overflow-x: hidden;
+}
+
+html {
+  background-color: var(--app-bg);
+  color-scheme: inherit;
+  scrollbar-color: var(--scrollbar-thumb) var(--app-bg);
+}
+
+body {
+  background-color: var(--app-bg);
+  color: var(--text-main);
+  font-family: var(--font-sans);
 }
 
 ::-webkit-scrollbar {
@@ -31,14 +94,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-app-bg);
+  background-color: var(--app-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border-subtle);
+  background-color: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background-color: var(--scrollbar-hover);
 }

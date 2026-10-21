@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AudioRead App",
-  description: "Leitor de documentos e livros com suporte a audio e customizacao",
+  title: "Letrê",
+  description: "Leitor de documentos com suporte a áudio e personalização.",
 };
 
 export default function RootLayout({
@@ -26,9 +26,11 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}>
-      <body className="min-h-full flex flex-col bg-[#0A0A0C] text-[#F8FAFC]">
-        <div className="max-w-md w-full mx-auto min-h-screen bg-[#0A0A0C] shadow-2xl relative border-x border-white/5 flex flex-col">
+      data-theme="system"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col bg-app-bg text-text-main">
+        <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border-subtle">
           <DocumentProvider>
             {children}
           </DocumentProvider>
