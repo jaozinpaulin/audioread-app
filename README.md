@@ -1,10 +1,10 @@
 # Letrê
 
-Um leitor de documentos digitais desenvolvido com foco em acessibilidade, personalização e uma experiência de leitura confortável em dispositivos móveis.
+Um leitor de documentos digitais desenvolvido com foco em acessibilidade, personalização e conforto durante a leitura.
 
 ## Sobre o projeto
 
-O Letrê é uma aplicação web que permite importar e visualizar documentos PDF em uma interface simples e intuitiva. O projeto busca oferecer uma experiência de leitura agradável, com foco na organização dos documentos, na acessibilidade e na evolução contínua dos recursos de leitura.
+O Letrê é uma aplicação web que permite importar e visualizar documentos PDF em uma interface simples e intuitiva. O projeto busca tornar a leitura digital mais confortável, com recursos de navegação e personalização.
 
 ## Prévia do projeto
 
@@ -19,25 +19,26 @@ O Letrê é uma aplicação web que permite importar e visualizar documentos PDF
 ## Tecnologias utilizadas
 
 - **Next.js** — estrutura da aplicação com App Router.
-- **TypeScript** — tipagem estática para maior segurança no desenvolvimento.
-- **Tailwind CSS** — estilização e construção da interface.
+- **TypeScript** — tipagem estática.
+- **Tailwind CSS** — estilização da interface.
 - **Zustand** — gerenciamento de estado.
 - **Lucide React** — biblioteca de ícones.
-- **PDF.js** — processamento e visualização de documentos PDF.
+- **PDF.js** — processamento de documentos PDF.
 
 ## Funcionalidades
 
-- **Biblioteca de documentos:** importação e organização de arquivos PDF.
-- **Leitor integrado:** visualização do conteúdo dos documentos.
-- **Interface responsiva:** experiência adaptada para dispositivos móveis e desktops.
-- **Configurações de leitura:** painel dedicado à personalização da experiência.
-- **Navegação simplificada:** acesso rápido à biblioteca, à leitura e às informações do projeto.
+- Importação e organização de documentos PDF.
+- Visualização de documentos em uma interface integrada.
+- Navegação entre páginas.
+- Leitura de texto com síntese de voz.
+- Configurações para personalizar a experiência de leitura.
+- Interface responsiva para diferentes dispositivos.
 
 ## Desenvolvido por
 
 **João Paulo**
 
-Projeto desenvolvido para portfólio, com foco no aprendizado de Next.js, TypeScript e desenvolvimento front-end.
+Projeto de portfólio desenvolvido para praticar Next.js, TypeScript e desenvolvimento front-end.
 
 ---
 
