@@ -26,6 +26,7 @@ export default function ReadingPage() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [textSize, setTextSize] = useState('Small');
 
     const [pageCurent, setPageCurrent] = useState(
         Number(selectedDocument?.currentPage) || 1,
@@ -290,7 +291,7 @@ export default function ReadingPage() {
     }, [pageCurent]);
 
 
-    console.log(currentText)
+    console.log(textSize)
 
     return (
         <main className="flex min-h-screen w-full max-w-2xl flex-1 flex-col justify-between mx-auto px-4 text-text-main">
@@ -313,16 +314,28 @@ export default function ReadingPage() {
                         isOpen={isOpen}
                         setIsOpen={setIsOpen}
                         onVoiceChange={setSelectedVoice}
+                        onTextSizeChange={setTextSize}
                     />
                 </div>
 
             </header>
 
             <div className="flex-1 overflow-y-auto pt-20 pb-48">
-                <div className="space-y-0.5 py-6 text-sm tracking-wide text-text-main md:text-base">
+                <div
+                    className="space-y-0.5 py-6 tracking-wide text-text-main"
+                    style={{
+                        fontSize: {
+                            Small: 'var(--reading-small)',
+                            Medium: 'var(--reading-medium)',
+                            Large: 'var(--reading-large)',
+                            'Extra large': 'var(--reading-extra-large)',
+                        }[textSize],
+                    }}
+                >
+
 
                     {isLoading ? (
-                        <div className="flex flex-col items-center text- justify-center gap-3 py-16">
+                        <div className="flex flex-col items-center justify-center gap-3 py-16">
                             <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-300" />
                         </div>
                     ) : pageImage ? (
@@ -356,7 +369,7 @@ export default function ReadingPage() {
                         })
 
                     ) : (
-                        <p className="py-16 text-center text-sm text-zinc-500">
+                        <p className="py-16 text-center text-zinc-500">
                             Nenhum conteúdo disponível.
                         </p>
                     )}
