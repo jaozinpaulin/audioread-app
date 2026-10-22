@@ -24,7 +24,7 @@ const initialSettings = {
     voice: 'en-US-JennyNeural',
 };
 
-export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
+export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextSizeChange }) {
     const [settings, setSettings] = useState(initialSettings);
     const [savedSettings, setSavedSettings] = useState(initialSettings);
     const [languageOpen, setLanguageOpen] = useState(false);
@@ -52,6 +52,7 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
         document.documentElement.dataset.theme = settings.theme.toLowerCase();
     }, [settings.theme]);
 
+
     function reset() {
         setSettings({ ...initialSettings });
         applyTheme(initialSettings.theme);
@@ -72,6 +73,8 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange }) {
     function save() {
         setSavedSettings({ ...settings });
         applyTheme(settings.theme);
+        onVoiceChange?.(settings.voice);
+        onTextSizeChange?.(settings.textSize);
         setIsOpen(false);
     }
 
