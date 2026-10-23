@@ -17,18 +17,42 @@ const languages = [
 
 const initialSettings = {
     speed: 1,
-    pitch: 1,
-    textSize: 'Small',
+    textSize: 'Medium',
     theme: 'System',
     language: 'English',
     voice: 'en-US-JennyNeural',
 };
 
 export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextSizeChange }) {
+
     const [settings, setSettings] = useState(initialSettings);
     const [savedSettings, setSavedSettings] = useState(initialSettings);
+    const [carregado, setCarregado] = useState(false);
     const [languageOpen, setLanguageOpen] = useState(false);
     const [voiceOpen, setVoiceOpen] = useState(false);
+
+    useEffect(() => {
+        const saved = localStorage.getItem('userSettings');
+
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+
+                const restored = {
+                    ...initialSettings,
+                    ...parsed,
+                };
+
+                setSettings(restored);
+                setSavedSettings(restored);
+            } catch {
+                localStorage.removeItem('userSettings');
+            }
+        }
+
+        setCarregado(true);
+    }, []);
+
 
     const languageCode = languages.find(
         (language) => language.name === settings.language
@@ -44,14 +68,18 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextS
         }
     }
 
-    function applyTheme(theme) {
-        document.documentElement.dataset.theme = theme.toLowerCase();
-    }
-
     useEffect(() => {
-        document.documentElement.dataset.theme = settings.theme.toLowerCase();
-    }, [settings.theme]);
+        if (!carregado) return;
 
+        document.documentElement.dataset.theme = settings.theme.toLowerCase();
+
+        onVoiceChange?.(settings.voice);
+        onTextSizeChange?.(settings.textSize);
+    }, [carregado, settings.theme, settings.voice, settings.textSize, onVoiceChange, onTextSizeChange]);
+
+    function updateSettings() {
+        localStorage.setItem('userSettings', JSON.stringify(settings));
+    }
 
     function reset() {
         setSettings({ ...initialSettings });
@@ -71,13 +99,10 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextS
     }
 
     function save() {
+        updateSettings();
         setSavedSettings({ ...settings });
-        applyTheme(settings.theme);
-        onVoiceChange?.(settings.voice);
-        onTextSizeChange?.(settings.textSize);
         setIsOpen(false);
     }
-
     const label = 'mb-2 block text-xs font-medium text-text-muted';
     const control =
         'flex w-full items-center justify-between rounded-lg border border-border-subtle bg-card-bg px-3 py-2.5 text-sm text-text-main outline-none transition-colors hover:border-primary-rose/50 focus:border-primary-rose';
@@ -306,8 +331,9 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextS
                             </button>
                         </div>
                     </div>
-                </div>
-            )}
+                </div >
+            )
+            }
         </>
     );
 }
