@@ -290,9 +290,6 @@ export default function ReadingPage() {
         }
     }, [pageCurent]);
 
-
-    console.log(textSize)
-
     return (
         <main className="flex min-h-screen w-full max-w-2xl flex-1 flex-col justify-between mx-auto px-4 text-text-main">
 
