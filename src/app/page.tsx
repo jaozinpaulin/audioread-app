@@ -65,6 +65,7 @@ export default function Home() {
                     <span className="text-xs text-text-muted">v0.3</span>
                 </div>
             </header>
+
             <div className="my-6 mx-auto w-full max-w-5xl flex-1 space-y-6 overflow-y-auto pt-16">
                 <div className="relative w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -121,9 +122,10 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto flex max-w-md flex-col gap-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-3 backdrop-blur-md md:static md:max-w-none md:flex-row md:justify-end md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
-                <label className="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl bg-accent-crimson px-4 py-3 text-sm font-medium text-white transition-all hover:bg-[#b0453c] md:w-auto md:min-w-44">
-                    <Upload className="w-4 h-4" />
+            <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto flex max-w-md flex-col gap-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-3  md:static md:max-w-none md:flex-row md:justify-end md:border-0 md:bg-transparent md:p-0 ">
+
+                <label className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-white/10 bg-accent-crimson px-5 py-4 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#b0453c] active:scale-[0.98] md:w-auto md:min-w-72 md:px-8">
+                    <Upload className="h-5 w-5" />
 
                     <span>Importar PDF</span>
 
