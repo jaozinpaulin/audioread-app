@@ -1,9 +1,8 @@
 // @ts-nocheck
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { Check, ChevronDown, SlidersHorizontal, Volume2 } from 'lucide-react';
 import { voices } from '../services/tts';
 
 const textSizes = ['Small', 'Medium', 'Large', 'Extra large'];
@@ -21,9 +20,10 @@ const initialSettings = {
     theme: 'System',
     language: 'English',
     voice: 'en-US-JennyNeural',
+    volume: 1,
 };
 
-export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextSizeChange }) {
+export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextSizeChange, onVolumeChange }) {
 
     const [settings, setSettings] = useState(initialSettings);
     const [savedSettings, setSavedSettings] = useState(initialSettings);
@@ -45,6 +45,12 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextS
 
                 setSettings(restored);
                 setSavedSettings(restored);
+
+                // Aplica valores iniciais salvos
+                document.documentElement.dataset.theme = restored.theme.toLowerCase();
+                onVoiceChange?.(restored.voice);
+                onTextSizeChange?.(restored.textSize);
+                onVolumeChange?.(restored.volume);
             } catch {
                 localStorage.removeItem('userSettings');
             }
@@ -61,21 +67,22 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextS
     const filteredVoices = voices[languageCode] || [];
 
     function update(key, value) {
-        setSettings((current) => ({ ...current, [key]: value }));
+        setSettings((current) => {
+            const updated = { ...current, [key]: value };
+            return updated;
+        });
 
+        // Aplica imediatamente as mudanças em tempo real sem sobrescrever o estado inteiro
         if (key === 'voice') {
             onVoiceChange?.(value);
+        } else if (key === 'volume') {
+            onVolumeChange?.(value);
+        } else if (key === 'textSize') {
+            onTextSizeChange?.(value);
+        } else if (key === 'theme') {
+            document.documentElement.dataset.theme = value.toLowerCase();
         }
     }
-
-    useEffect(() => {
-        if (!carregado) return;
-
-        document.documentElement.dataset.theme = settings.theme.toLowerCase();
-
-        onVoiceChange?.(settings.voice);
-        onTextSizeChange?.(settings.textSize);
-    }, [carregado, settings.theme, settings.voice, settings.textSize, onVoiceChange, onTextSizeChange]);
 
     function updateSettings() {
         localStorage.setItem('userSettings', JSON.stringify(settings));
@@ -83,16 +90,20 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextS
 
     function reset() {
         setSettings({ ...initialSettings });
-        applyTheme(initialSettings.theme);
+        document.documentElement.dataset.theme = initialSettings.theme.toLowerCase();
         onVoiceChange?.(initialSettings.voice);
+        onTextSizeChange?.(initialSettings.textSize);
+        onVolumeChange?.(initialSettings.volume);
         setLanguageOpen(false);
         setVoiceOpen(false);
     }
 
     function cancel() {
         setSettings({ ...savedSettings });
-        applyTheme(savedSettings.theme);
+        document.documentElement.dataset.theme = savedSettings.theme.toLowerCase();
         onVoiceChange?.(savedSettings.voice);
+        onTextSizeChange?.(savedSettings.textSize);
+        onVolumeChange?.(savedSettings.volume);
         setLanguageOpen(false);
         setVoiceOpen(false);
         setIsOpen(false);
@@ -103,6 +114,7 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextS
         setSavedSettings({ ...settings });
         setIsOpen(false);
     }
+
     const label = 'mb-2 block text-xs font-medium text-text-muted';
     const control =
         'flex w-full items-center justify-between rounded-lg border border-border-subtle bg-card-bg px-3 py-2.5 text-sm text-text-main outline-none transition-colors hover:border-primary-rose/50 focus:border-primary-rose';
@@ -162,6 +174,29 @@ export default function MenuSettings({ isOpen, setIsOpen, onVoiceChange, onTextS
                                         <span>0.5x</span>
                                         <span>2.0x</span>
                                     </div>
+                                </div>
+
+                                <div className="border-t border-border-subtle pt-4">
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <label className="text-xs text-text-muted flex items-center gap-1.5">
+                                            <Volume2 className="h-3.5 w-3.5" /> Volume
+                                        </label>
+                                        <span className="text-xs font-medium text-text-main">
+                                            {Math.round(settings.volume * 100)}%
+                                        </span>
+                                    </div>
+
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.05"
+                                        value={settings.volume}
+                                        onChange={(e) =>
+                                            update('volume', Number(e.target.value))
+                                        }
+                                        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-subtle accent-primary-rose"
+                                    />
                                 </div>
 
                             </div>
