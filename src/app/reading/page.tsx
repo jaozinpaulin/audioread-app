@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, SlidersHorizontal, ChevronRight, SkipBack, RotateCcw, Play, Pause, RotateCw, SkipForward, Scale, } from 'lucide-react';
+import { ArrowLeft, SlidersHorizontal, ChevronRight, SkipBack, RotateCcw, Play, Pause, RotateCw, SkipForward, Scale, Volume2 } from 'lucide-react';
 import { useDocuments } from '../hooks/useDocuments';
 
 import * as pdfjsLib from 'pdfjs-dist';
@@ -26,6 +26,7 @@ export default function ReadingPage() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [volume, setVolume] = useState(1);
     const [textSize, setTextSize] = useState('Small');
 
     const [pageCurent, setPageCurrent] = useState(
@@ -42,6 +43,21 @@ export default function ReadingPage() {
     const [pageImage, setPageImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+
+    // Carrega o volume inicial salvo no localStorage para evitar conflito na montagem
+    useEffect(() => {
+        const saved = localStorage.getItem('userSettings');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (typeof parsed.volume === 'number') {
+                    setVolume(parsed.volume);
+                }
+            } catch {
+                // ignora erro de parse
+            }
+        }
+    }, []);
 
 
     function formatTime(time: number) {
@@ -227,8 +243,8 @@ export default function ReadingPage() {
             const audioUrl = URL.createObjectURL(audio);
             const player = new Audio(audioUrl);
 
+            player.volume = volume;
             audioRef.current = player;
-
             player.ontimeupdate = () => {
                 setCurrentTime(player.currentTime);
 
@@ -312,6 +328,12 @@ export default function ReadingPage() {
                         setIsOpen={setIsOpen}
                         onVoiceChange={setSelectedVoice}
                         onTextSizeChange={setTextSize}
+                        onVolumeChange={(newVol) => {
+                            setVolume(newVol);
+                            if (audioRef.current) {
+                                audioRef.current.volume = newVol;
+                            }
+                        }}
                     />
                 </div>
 
@@ -374,6 +396,45 @@ export default function ReadingPage() {
             </div >
 
             <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-2xl space-y-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-4 backdrop-blur-md sm:px-6 lg:px-8">
+                <div className="hidden items-center justify-end gap-3 md:flex">
+                    <Volume2 className="h-4 w-4 shrink-0 text-text-muted" />
+
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={volume}
+                        onChange={(evt) => {
+                            const newVolume = Number(evt.target.value);
+                            setVolume(newVolume);
+
+                            if (audioRef.current) {
+                                audioRef.current.volume = newVolume;
+                            }
+
+                            // Atualiza também no localStorage para manter sincronizado com o MenuSettings
+                            const saved = localStorage.getItem('userSettings');
+                            if (saved) {
+                                try {
+                                    const parsed = JSON.parse(saved);
+                                    parsed.volume = newVolume;
+                                    localStorage.setItem('userSettings', JSON.stringify(parsed));
+                                } catch { }
+                            }
+                        }}
+                        aria-label="Volume do áudio"
+                        className="h-1 w-24 cursor-pointer appearance-none rounded-full bg-card-hover accent-accent-crimson"
+                        style={{
+                            accentColor: 'var(--accent-crimson)',
+                        }}
+                    />
+                    <span className="w-8 text-right text-xs tabular-nums text-text-muted">
+                        {Math.round(volume * 100)}%
+                    </span>
+                </div>
+
+
                 <div className="space-y-2">
                     <div
                         className="h-1 w-full overflow-hidden rounded-full bg-card-hover"
@@ -443,7 +504,7 @@ export default function ReadingPage() {
                         onClick={prevPage}
                         disabled={pageCurent === 1}
                         aria-label="Previous page"
-                        className="cursor-pointer p-2 text-text-muted transition-colors hover:text-text-main disabled:cursor-not-allowed disabled:opacity-30"                    >
+                        className="cursor-pointer p-2 text-text-muted transition-colors hover:text-text-main disabled:cursor-not-allowed disabled:opacity-30"                   >
 
                         <SkipBack className="h-5 w-5" />
                     </button>
@@ -491,7 +552,7 @@ export default function ReadingPage() {
                         onClick={nextPage}
                         disabled={pageCurent === totalPages}
                         aria-label="Next page"
-                        className="cursor-pointer p-2 text-text-muted transition-colors hover:text-text-main disabled:cursor-not-allowed disabled:opacity-30"                    >
+                        className="cursor-pointer p-2 text-text-muted transition-colors hover:text-text-main disabled:cursor-not-allowed disabled:opacity-30"                   >
                         <SkipForward className="h-5 w-5" />
                     </button>
                 </div>
