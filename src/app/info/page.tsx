@@ -5,9 +5,9 @@ import { ArrowLeft, ExternalLink } from 'lucide-react';
 
 export default function InfoPage() {
     return (
-        <main className="flex-1 flex flex-col max-w-xl mx-auto w-full min-h-screen bg-app-bg text-text-main px-5">
+        <main className="flex min-h-screen w-full flex-1 flex-col px-5 text-text-main md:px-8 lg:px-12">
 
-            <header className="fixed top-0 left-0 right-0 max-w-xl mx-auto bg-app-bg/85 backdrop-blur-md px-5 py-3.5 border-b border-border-subtle flex items-center justify-between shrink-0 z-50">
+            < header className="fixed top-0 left-0 right-0 max-w-xl mx-auto bg-app-bg/85 backdrop-blur-md px-5 py-3.5 border-b border-border-subtle flex items-center justify-between shrink-0 z-50" >
                 <Link
                     href="/"
                     className="p-2 -ml-2 rounded-xl text-text-muted hover:text-text-main hover:bg-card-bg transition-colors"
@@ -20,7 +20,7 @@ export default function InfoPage() {
                 </h1>
 
                 <div className="w-8" />
-            </header>
+            </header >
 
             <div className="pt-24 pb-12 space-y-8 flex-1">
 
@@ -89,6 +89,6 @@ export default function InfoPage() {
                 </section>
 
             </div>
-        </main>
+        </main >
     );
 }
