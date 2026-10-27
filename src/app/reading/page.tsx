@@ -291,9 +291,9 @@ export default function ReadingPage() {
     }, [pageCurent]);
 
     return (
-        <main className="flex min-h-screen w-full max-w-2xl flex-1 flex-col justify-between mx-auto px-4 text-text-main">
+        <main className="flex min-h-screen w-full max-w-2xl flex-1 flex-col justify-between mx-auto px-4 sm:px-6 lg:px-8 text-text-main">
 
-            <header className="fixed top-0 left-0 right-0 z-50 mx-auto flex max-w-2xl items-center justify-between border-b border-border-subtle/40 bg-app-bg/90 px-4 py-3 backdrop-blur-md">
+            <header className="fixed top-0 left-0 right-0 z-50 mx-auto flex max-w-2xl items-center justify-between border-b border-border-subtle/40 bg-app-bg/90 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
 
                 <Link
                     href="/"
@@ -373,8 +373,7 @@ export default function ReadingPage() {
                 </div>
             </div >
 
-            <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-2xl space-y-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-4 backdrop-blur-md">
-
+            <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-2xl space-y-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-4 backdrop-blur-md sm:px-6 lg:px-8">
                 <div className="space-y-2">
                     <div
                         className="h-1 w-full overflow-hidden rounded-full bg-card-hover"
