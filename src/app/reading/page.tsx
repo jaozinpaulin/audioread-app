@@ -15,6 +15,7 @@ export default function ReadingPage() {
     const menuRef = useRef(null);
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
+    const isSwiping = useRef(false);
 
     const { selectedDocument } = useDocuments();
     const [selectedVoice, setSelectedVoice] = useState('pt-BR-FranciscaNeural');
@@ -287,6 +288,45 @@ export default function ReadingPage() {
         }
     }
 
+
+    function handleTouchStart(evt: React.TouchEvent<HTMLDivElement>) {
+        const target = evt.target as HTMLElement;
+
+        if (target.closest('button, input, a, select, textarea')) {
+            isSwiping.current = false;
+            return;
+        }
+
+        touchStartX.current = evt.touches[0].clientX;
+        touchStartY.current = evt.touches[0].clientY;
+        isSwiping.current = true;
+    }
+
+    function handleTouchEnd(evt: React.TouchEvent<HTMLDivElement>) {
+        if (!isSwiping.current) return;
+
+        isSwiping.current = false;
+
+        const touch = evt.changedTouches[0];
+        const deltaX = touch.clientX - touchStartX.current;
+        const deltaY = touch.clientY - touchStartY.current;
+
+        const minSwipeDistance = 70;
+
+        if (
+            Math.abs(deltaX) < minSwipeDistance ||
+            Math.abs(deltaX) < Math.abs(deltaY) * 1.5
+        ) {
+            return;
+        }
+
+        if (deltaX < 0) {
+            nextPage();
+        } else {
+            prevPage();
+        }
+    }
+
     useEffect(() => {
         readPdf();
     }, [selectedDocument, pageCurent]);
@@ -339,7 +379,10 @@ export default function ReadingPage() {
 
             </header>
 
-            <div className="flex-1 overflow-y-auto pt-20 pb-48">
+            <div className="flex-1 overflow-y-auto pt-20 pb-48"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+            >
                 <div
                     className="space-y-0.5 py-6 tracking-wide text-text-main"
                     style={{
