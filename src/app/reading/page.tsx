@@ -401,7 +401,6 @@ export default function ReadingPage() {
                     }}
                 >
 
-
                     {pageImage ? (
                         <img
                             src={pageImage}
@@ -439,8 +438,11 @@ export default function ReadingPage() {
                     )}
                 </div>
             </div >
+            <div
+                className={`fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-2xl space-y-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-4 backdrop-blur-md sm:px-6 lg:px-8 ${isOpen ? 'max-sm:hidden' : ''
+                    }`}
+            >
 
-            <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-2xl space-y-4 border-t border-border-subtle/40 bg-app-bg/90 px-4 py-4 backdrop-blur-md sm:px-6 lg:px-8">
                 <div className="hidden items-center justify-end gap-3 md:flex">
                     <Volume2 className="h-4 w-4 shrink-0 text-text-muted" />
 

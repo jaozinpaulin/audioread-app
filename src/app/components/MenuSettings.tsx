@@ -1,11 +1,14 @@
 // @ts-nocheck
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+
 import {
-    Check, ChevronDown, RotateCcw, SlidersHorizontal,
+    ArrowLeft, Check, ChevronDown, RotateCcw, SlidersHorizontal,
     Volume2, Gauge, Monitor, Sun, Moon, Type,
 } from 'lucide-react';
+
 import { voices } from '../services/tts';
 
 const textSizes = [
@@ -55,10 +58,13 @@ export default function MenuSettings({
 
             if (saved) {
                 const restored = { ...initialSettings, ...JSON.parse(saved) };
+
                 setSettings(restored);
                 setSavedSettings(restored);
                 savedSettingsRef.current = restored;
+
                 document.documentElement.dataset.theme = restored.theme.toLowerCase();
+
                 onVoiceChange?.(restored.voice);
                 onTextSizeChange?.(restored.textSize);
                 onVolumeChange?.(restored.volume);
@@ -73,12 +79,20 @@ export default function MenuSettings({
     }, []);
 
     const hasChanges = JSON.stringify(settings) !== JSON.stringify(savedSettings);
-    const languageCode = languages.find((item) => item.name === settings.language)?.code;
+
+    const languageCode = languages.find(
+        (item) => item.name === settings.language
+    )?.code;
+
     const filteredVoices = voices[languageCode] || [];
-    const selectedSize = textSizes.find((item) => item.name === settings.textSize) || textSizes[1];
+
+    const selectedSize = textSizes.find(
+        (item) => item.name === settings.textSize
+    ) || textSizes[1];
 
     function applySettings(next) {
         document.documentElement.dataset.theme = next.theme.toLowerCase();
+
         onVoiceChange?.(next.voice);
         onTextSizeChange?.(next.textSize);
         onVolumeChange?.(next.volume);
@@ -99,6 +113,7 @@ export default function MenuSettings({
 
     function cancel() {
         const saved = savedSettingsRef.current;
+
         setSettings({ ...saved });
         applySettings(saved);
         closeDropdowns();
@@ -107,9 +122,12 @@ export default function MenuSettings({
 
     function save() {
         localStorage.setItem('userSettings', JSON.stringify(settings));
+
         const next = { ...settings };
+
         setSavedSettings(next);
         savedSettingsRef.current = next;
+
         closeDropdowns();
         setIsOpen(false);
     }
@@ -123,7 +141,11 @@ export default function MenuSettings({
         if (!isOpen || !carregado) return;
 
         function handleOutsideClick(event) {
-            if (menuRef.current?.contains(event.target) || buttonRef.current?.contains(event.target)) return;
+            if (
+                menuRef.current?.contains(event.target) ||
+                buttonRef.current?.contains(event.target)
+            ) return;
+
             cancel();
         }
 
@@ -144,8 +166,8 @@ export default function MenuSettings({
     }, [isOpen, carregado, savedSettings]);
 
     const label = 'mb-2 block text-xs font-medium text-text-muted';
+
     const control = 'flex w-full items-center justify-between gap-3 rounded-lg border border-border-subtle bg-card-bg px-3 py-2.5 text-sm text-text-main outline-none transition-colors hover:border-primary-rose/50 focus-visible:border-primary-rose focus-visible:ring-2 focus-visible:ring-primary-rose/20';
-    const option = 'rounded-lg py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose/40';
 
     if (!carregado) {
         return (
@@ -184,13 +206,27 @@ export default function MenuSettings({
                     ref={menuRef}
                     role="dialog"
                     aria-label="Reading settings"
-                    className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(80vh,680px)] w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-border-subtle bg-app-bg shadow-2xl sm:w-96"
+                    className="fixed inset-0 z-[100] flex h-dvh w-full flex-col overflow-hidden bg-app-bg sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:h-auto sm:max-h-[min(80vh,680px)] sm:w-96 sm:max-w-[calc(100vw-2rem)] sm:rounded-xl sm:border sm:border-border-subtle sm:shadow-2xl"
                 >
-                    <div className="flex items-start justify-between gap-3 border-b border-border-subtle px-4 py-3.5">
-                        <div>
-                            <h2 className="text-sm font-semibold text-text-main">Reading settings</h2>
-                            <p className="mt-1 text-xs leading-5 text-text-muted">Customize your reading experience.</p>
+                    <div className="flex shrink-0 items-center gap-3 border-b border-border-subtle px-4 py-4 sm:items-start sm:justify-between sm:py-3.5">
+                        <button
+                            type="button"
+                            onClick={cancel}
+                            aria-label="Back to reading"
+                            className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border-subtle text-text-muted transition-colors hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose sm:hidden"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-base font-semibold text-text-main sm:text-sm">
+                                Reading settings
+                            </h2>
+                            <p className="mt-1 text-xs leading-5 text-text-muted">
+                                Customize your reading experience.
+                            </p>
                         </div>
+
                         {hasChanges && (
                             <span className="shrink-0 rounded-full bg-primary-rose/10 px-2 py-1 text-[10px] font-medium text-primary-rose">
                                 Unsaved
@@ -198,19 +234,26 @@ export default function MenuSettings({
                         )}
                     </div>
 
-                    <div className="space-y-5 overflow-y-auto overscroll-contain p-4">
+                    <div className="min-h-0 flex-1 space-y-6 overflow-x-hidden overflow-y-auto overscroll-y-contain p-4 sm:space-y-5">
                         <div>
                             <div className="mb-3 flex items-center gap-2">
                                 <Gauge size={15} className="text-text-muted" />
-                                <h3 className="text-xs font-medium text-text-main">Reading</h3>
+                                <h3 className="text-xs font-medium text-text-main">
+                                    Reading
+                                </h3>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-5">
                                 <div>
                                     <div className="mb-2 flex items-center justify-between">
-                                        <label htmlFor="reading-speed" className="text-xs text-text-muted">Reading speed</label>
-                                        <span className="text-xs font-medium text-text-main">{settings.speed.toFixed(1)}x</span>
+                                        <label htmlFor="reading-speed" className="text-xs text-text-muted">
+                                            Reading speed
+                                        </label>
+                                        <span className="text-xs font-medium text-text-main">
+                                            {settings.speed.toFixed(1)}x
+                                        </span>
                                     </div>
+
                                     <input
                                         id="reading-speed"
                                         type="range"
@@ -221,6 +264,7 @@ export default function MenuSettings({
                                         onChange={(event) => update('speed', Number(event.target.value))}
                                         className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-subtle accent-primary-rose"
                                     />
+
                                     <div className="mt-1 flex justify-between text-[10px] text-text-muted">
                                         <span>0.5x</span>
                                         <span>2.0x</span>
@@ -230,10 +274,14 @@ export default function MenuSettings({
                                 <div>
                                     <div className="mb-2 flex items-center justify-between">
                                         <label htmlFor="reading-volume" className="flex items-center gap-1.5 text-xs text-text-muted">
-                                            <Volume2 size={14} /> Volume
+                                            <Volume2 size={14} />
+                                            Volume
                                         </label>
-                                        <span className="text-xs font-medium text-text-main">{Math.round(settings.volume * 100)}%</span>
+                                        <span className="text-xs font-medium text-text-main">
+                                            {Math.round(settings.volume * 100)}%
+                                        </span>
                                     </div>
+
                                     <input
                                         id="reading-volume"
                                         type="range"
@@ -244,6 +292,7 @@ export default function MenuSettings({
                                         onChange={(event) => update('volume', Number(event.target.value))}
                                         className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-border-subtle accent-primary-rose"
                                     />
+
                                     <div className="mt-1 flex justify-between text-[10px] text-text-muted">
                                         <span>0%</span>
                                         <span>100%</span>
@@ -252,10 +301,12 @@ export default function MenuSettings({
                             </div>
                         </div>
 
-                        <div className="border-t border-border-subtle pt-4">
+                        <div className="border-t border-border-subtle pt-5">
                             <div className="mb-3 flex items-center gap-2">
                                 <Type size={15} className="text-text-muted" />
-                                <h3 className="text-xs font-medium text-text-main">Text size</h3>
+                                <h3 className="text-xs font-medium text-text-main">
+                                    Text size
+                                </h3>
                             </div>
 
                             <div className="grid grid-cols-4 gap-2">
@@ -266,28 +317,35 @@ export default function MenuSettings({
                                         onClick={() => update('textSize', size.name)}
                                         aria-label={size.label}
                                         aria-pressed={settings.textSize === size.name}
-                                        className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border px-1 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose ${settings.textSize === size.name
+                                        className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border px-1 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose ${settings.textSize === size.name
                                             ? 'border-primary-rose bg-card-hover text-text-main'
                                             : 'border-border-subtle bg-card-bg text-text-muted hover:bg-card-hover hover:text-text-main'
                                             }`}
                                     >
-                                        <span className={`${size.size} leading-none`} aria-hidden="true">A</span>
-                                        <span className="text-[10px]">{size.label}</span>
+                                        <span className={`${size.size} leading-none`} aria-hidden="true">
+                                            A
+                                        </span>
+                                        <span className="text-[10px]">
+                                            {size.label}
+                                        </span>
                                         {settings.textSize === size.name && <Check size={12} />}
                                     </button>
                                 ))}
                             </div>
 
                             <div className="mt-3 rounded-lg border border-border-subtle bg-card-bg p-3">
-                                <span className="mb-2 block text-[10px] font-medium text-text-muted">Reading preview</span>
+                                <span className="mb-2 block text-[10px] font-medium text-text-muted">
+                                    Reading preview
+                                </span>
                                 <p className={`${selectedSize.preview} leading-relaxed text-text-main`}>
                                     The right text size makes reading more comfortable.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="border-t border-border-subtle pt-4">
+                        <div className="border-t border-border-subtle pt-5">
                             <h3 className={label}>Appearance</h3>
+
                             <div className="grid grid-cols-3 gap-2">
                                 {themes.map(({ name, label: themeLabel, icon: Icon }) => (
                                     <button
@@ -308,11 +366,14 @@ export default function MenuSettings({
                             </div>
                         </div>
 
-                        <div className="border-t border-border-subtle pt-4">
-                            <h3 className={`${label} mb-3`}>Language and voice</h3>
+                        <div className="border-t border-border-subtle pt-5">
+                            <h3 className={`${label} mb-3`}>
+                                Language and voice
+                            </h3>
 
                             <div>
                                 <label className={label}>Language</label>
+
                                 <div className="relative">
                                     <button
                                         type="button"
@@ -324,7 +385,10 @@ export default function MenuSettings({
                                         className={control}
                                     >
                                         <span>{settings.language}</span>
-                                        <ChevronDown size={15} className={`shrink-0 transition-transform motion-reduce:transition-none ${languageOpen ? 'rotate-180' : ''}`} />
+                                        <ChevronDown
+                                            size={15}
+                                            className={`shrink-0 transition-transform ${languageOpen ? 'rotate-180' : ''}`}
+                                        />
                                     </button>
 
                                     {languageOpen && (
@@ -335,18 +399,16 @@ export default function MenuSettings({
                                                     type="button"
                                                     onClick={() => {
                                                         const firstVoice = voices[language.code]?.[0];
-                                                        setSettings((current) => {
-                                                            const updated = {
-                                                                ...current,
-                                                                language: language.name,
-                                                                ...(firstVoice && { voice: firstVoice.id }),
-                                                            };
-                                                            applySettings(updated);
-                                                            return updated;
-                                                        });
+
+                                                        setSettings((current) => ({
+                                                            ...current,
+                                                            language: language.name,
+                                                            ...(firstVoice && { voice: firstVoice.id }),
+                                                        }));
+
                                                         closeDropdowns();
                                                     }}
-                                                    className="flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm text-text-muted hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose"
+                                                    className="flex w-full items-center justify-between rounded-md px-3 py-3 text-left text-sm text-text-muted hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose"
                                                 >
                                                     {language.name}
                                                     {settings.language === language.name && <Check size={14} />}
@@ -359,6 +421,7 @@ export default function MenuSettings({
 
                             <div className="mt-4">
                                 <label className={label}>Reading voice</label>
+
                                 <div className="relative">
                                     <button
                                         type="button"
@@ -372,7 +435,10 @@ export default function MenuSettings({
                                         <span className="truncate">
                                             {filteredVoices.find((voice) => voice.id === settings.voice)?.name || 'Select voice'}
                                         </span>
-                                        <ChevronDown size={15} className={`shrink-0 transition-transform motion-reduce:transition-none ${voiceOpen ? 'rotate-180' : ''}`} />
+                                        <ChevronDown
+                                            size={15}
+                                            className={`shrink-0 transition-transform ${voiceOpen ? 'rotate-180' : ''}`}
+                                        />
                                     </button>
 
                                     {voiceOpen && (
@@ -385,10 +451,14 @@ export default function MenuSettings({
                                                         update('voice', voice.id);
                                                         setVoiceOpen(false);
                                                     }}
-                                                    className="flex w-full items-center justify-between gap-2 rounded-md px-3 py-2.5 text-left text-sm text-text-muted hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose"
+                                                    className="flex w-full items-center justify-between gap-2 rounded-md px-3 py-3 text-left text-sm text-text-muted hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose"
                                                 >
-                                                    <span className="truncate">{voice.name}</span>
-                                                    {settings.voice === voice.id && <Check size={14} className="shrink-0" />}
+                                                    <span className="truncate">
+                                                        {voice.name}
+                                                    </span>
+                                                    {settings.voice === voice.id && (
+                                                        <Check size={14} className="shrink-0" />
+                                                    )}
                                                 </button>
                                             ))}
                                         </div>
@@ -398,28 +468,30 @@ export default function MenuSettings({
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 border-t border-border-subtle bg-app-bg px-3 py-3 sm:px-4">
+                    <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border-subtle bg-app-bg px-3 py-3 sm:px-4">
                         <button
                             type="button"
                             onClick={reset}
-                            className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-xs text-text-muted hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose"
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-xs text-text-muted hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose"
                         >
-                            <RotateCcw size={13} /> Reset
+                            <RotateCcw size={13} />
+                            Reset
                         </button>
 
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
                                 onClick={cancel}
-                                className="rounded-lg px-3 py-2 text-xs text-text-muted hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose"
+                                className="rounded-lg px-3 py-2.5 text-xs text-text-muted hover:bg-card-hover hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose"
                             >
                                 Cancel
                             </button>
+
                             <button
                                 type="button"
                                 onClick={save}
                                 disabled={!hasChanges}
-                                className="rounded-lg bg-primary-rose px-3.5 py-2 text-xs font-medium text-app-bg hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose focus-visible:ring-offset-2"
+                                className="rounded-lg bg-primary-rose px-4 py-2.5 text-xs font-medium text-app-bg hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose focus-visible:ring-offset-2"
                             >
                                 Save
                             </button>
