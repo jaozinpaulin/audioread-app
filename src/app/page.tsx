@@ -77,6 +77,33 @@ export default function Home() {
                 data: await file.arrayBuffer(),
             }).promise;
 
+            let cover = '';
+
+            try {
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 0.4 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+
+                if (context) {
+                    canvas.width = Math.ceil(viewport.width);
+                    canvas.height = Math.ceil(viewport.height);
+
+                    await page.render({
+                        canvas,
+                        canvasContext: context,
+                        viewport,
+                    }).promise;
+
+                    cover = canvas.toDataURL('image/jpeg', 0.75);
+
+                    canvas.width = 0;
+                    canvas.height = 0;
+                }
+            } catch (coverError) {
+                console.warn('Não foi possível gerar a capa:', coverError);
+            }
+
             setDocuments((prev) => [
                 ...prev,
                 {
@@ -84,12 +111,16 @@ export default function Home() {
                     name: file.name,
                     pages: pdf.numPages,
                     currentPage: 1,
+                    cover,
                 },
             ]);
         } catch (error) {
             console.error('Erro ao importar PDF:', error);
+
             setError(
-                'Não foi possível importar o PDF. Verifique o arquivo e tente novamente.'
+                error.message === 'Selecione um arquivo PDF válido.'
+                    ? error.message
+                    : 'Não foi possível importar o PDF. Verifique o arquivo e tente novamente.'
             );
         } finally {
             setIsImporting(false);
@@ -121,18 +152,17 @@ export default function Home() {
             </header>
 
             <div className="mx-auto w-full max-w-5xl flex-1 space-y-8 pt-2">
-                <div className="space-y-2">
-                    <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                {/* <div className="space-y-2">
+                    <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
                         Biblioteca
                     </h2>
 
-                    <p className="max-w-lg text-sm leading-6 text-text-muted">
-                        Seus documentos, organizados em um só lugar.
-                        Escolha o próximo capítulo.
+                    <p className="text-sm text-text-muted">
+                        Seus documentos em um só lugar.
                     </p>
-                </div>
+                </div> */}
 
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="relative w-full sm:max-w-sm">
                         <Search
                             size={17}
@@ -149,7 +179,7 @@ export default function Home() {
                         />
                     </div>
 
-                    <span className="text-xs text-text-muted">
+                    <span className="text-xs text-right text-text-muted">
                         {documents.length}{' '}
                         {documents.length === 1 ? 'documento' : 'documentos'}
                     </span>
@@ -173,14 +203,23 @@ export default function Home() {
                                 onClick={() => handleOpenDocument(doc)}
                                 className="group flex w-full items-center gap-4 rounded-2xl border border-border-subtle bg-card-bg p-4 text-left transition-colors hover:border-primary-rose/40 hover:bg-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose sm:p-5"
                             >
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary-rose/20 bg-primary-rose/10 text-primary-rose">
-                                    <FileText size={21} />
-                                </div>
+                                {doc.cover ? (
+                                    <img
+                                        src={doc.cover}
+                                        alt={`Capa de ${doc.name}`}
+                                        className="h-20 w-14 shrink-0 rounded-lg border border-border-subtle object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-20 w-14 shrink-0 items-center justify-center rounded-lg border border-primary-rose/20 bg-primary-rose/10 text-primary-rose">
+                                        <FileText size={21} />
+                                    </div>
+                                )}
 
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="break-words text-sm font-medium sm:text-base">
+                                    <h3 className="truncate text-sm font-medium sm:text-base">
                                         {doc.name}
                                     </h3>
+
 
                                     <p className="mt-1 text-xs text-text-muted">
                                         PDF
