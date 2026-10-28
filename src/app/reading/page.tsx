@@ -10,6 +10,7 @@ import { useEffect, useState, useRef } from 'react';
 import MenuSettings from '../components/MenuSettings';
 import { match } from 'assert';
 import { sendTTS } from '../services/tts';
+import { error } from 'console';
 
 export default function ReadingPage() {
     const menuRef = useRef(null);
@@ -29,6 +30,7 @@ export default function ReadingPage() {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [volume, setVolume] = useState(1);
     const [textSize, setTextSize] = useState('Small');
+    const [isPageVisible, setIsPageVisible] = useState(true);
 
     const [pageCurent, setPageCurrent] = useState(
         Number(selectedDocument?.currentPage) || 1,
@@ -45,7 +47,6 @@ export default function ReadingPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
-    // Carrega o volume inicial salvo no localStorage para evitar conflito na montagem
     useEffect(() => {
         const saved = localStorage.getItem('userSettings');
         if (saved) {
@@ -55,7 +56,6 @@ export default function ReadingPage() {
                     setVolume(parsed.volume);
                 }
             } catch {
-                // ignora erro de parse
             }
         }
     }, []);
@@ -127,16 +127,15 @@ export default function ReadingPage() {
         if (!selectedDocument) return null;
 
         setIsLoading(true);
-        setPageImage(null);
-        setParagraphs([]);
+        setIsPageVisible(false);
 
         try {
             const file = selectedDocument.file;
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
             const page = await pdf.getPage(pageNumber);
             const textContent = await page.getTextContent();
+
             const linesMap = new Map();
 
             textContent.items.forEach((item) => {
@@ -159,6 +158,7 @@ export default function ReadingPage() {
 
             sortedY.forEach((y) => {
                 const lineItems = linesMap.get(y).sort((a, b) => a.x - b.x);
+
                 const lineText = lineItems
                     .map((item) => item.text)
                     .join(' ')
@@ -169,16 +169,15 @@ export default function ReadingPage() {
 
             const fullText = lines.join(' ').replace(/\s+/g, ' ').trim();
 
+            let image = null;
+
+            if (!fullText) {
+                image = await renderPageImage(page);
+            }
+
             setTotalPages(pdf.numPages);
-
-            if (!fullText && pageNumber === pageCurent) {
-                const image = await renderPageImage(page);
-                setPageImage(image ?? null);
-            }
-
-            if (pageNumber === pageCurent) {
-                setParagraphs(fullText ? [fullText] : []);
-            }
+            setPageImage(image);
+            setParagraphs(fullText ? [fullText] : []);
 
             return fullText;
         } catch (error) {
@@ -186,6 +185,12 @@ export default function ReadingPage() {
             return null;
         } finally {
             setIsLoading(false);
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    setIsPageVisible(true);
+                });
+            });
         }
     };
 
@@ -384,7 +389,8 @@ export default function ReadingPage() {
                 onTouchEnd={handleTouchEnd}
             >
                 <div
-                    className="space-y-0.5 py-6 tracking-wide text-text-main"
+                    className={`space-y-0.5 py-6 tracking-wide text-text-main transition-opacity duration-300 ease-in-out ${isPageVisible ? 'opacity-100' : 'opacity-0'
+                        }`}
                     style={{
                         fontSize: {
                             Small: 'var(--reading-small)',
@@ -396,11 +402,7 @@ export default function ReadingPage() {
                 >
 
 
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center gap-3 py-16">
-                            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-300" />
-                        </div>
-                    ) : pageImage ? (
+                    {pageImage ? (
                         <img
                             src={pageImage}
                             alt="Não foi possível exibir o texto desta página."
