@@ -1,9 +1,13 @@
 // @ts-nocheck
+
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+
 import Link from 'next/link';
+
 import { usePathname, useRouter } from 'next/navigation';
+
 import {
     Search,
     BookOpen,
@@ -14,13 +18,97 @@ import {
     ArrowUpRight,
     LoaderCircle,
 } from 'lucide-react';
+
 import * as pdfjsLib from 'pdfjs-dist';
+
 import { useDocuments } from './hooks/useDocuments';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
     import.meta.url
 ).toString();
+
+const DB_NAME = 'LetreDB';
+const STORE_NAME = 'documents';
+
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+
+        request.onupgradeneeded = () => {
+            const db = request.result;
+
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, {
+                    keyPath: 'id',
+                });
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function getSavedDocuments() {
+    const db = await openDatabase();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, 'readonly');
+        const request = transaction.objectStore(STORE_NAME).getAll();
+
+        request.onsuccess = () => {
+            resolve(
+                request.result.map((doc) => ({
+                    ...doc,
+                    file: new File(
+                        [doc.fileData],
+                        doc.name,
+                        {
+                            type: 'application/pdf',
+                            lastModified: doc.lastModified,
+                        }
+                    ),
+                }))
+            );
+
+            db.close();
+        };
+
+        request.onerror = () => {
+            db.close();
+            reject(request.error);
+        };
+    });
+}
+
+async function saveDocument(doc) {
+    const db = await openDatabase();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, 'readwrite');
+
+        transaction.objectStore(STORE_NAME).put({
+            id: doc.id,
+            name: doc.name,
+            pages: doc.pages,
+            currentPage: doc.currentPage,
+            cover: doc.cover,
+            lastModified: doc.file.lastModified,
+            fileData: doc.file,
+        });
+
+        transaction.oncomplete = () => {
+            db.close();
+            resolve();
+        };
+
+        transaction.onerror = () => {
+            db.close();
+            reject(transaction.error);
+        };
+    });
+}
 
 export default function Home() {
     const { documents, setDocuments, setSelectedDocument } = useDocuments();
@@ -30,7 +118,40 @@ export default function Home() {
 
     const [search, setSearch] = useState('');
     const [isImporting, setIsImporting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        let active = true;
+
+        async function loadDocuments() {
+            try {
+                const savedDocuments = await getSavedDocuments();
+
+                if (active) {
+                    setDocuments(savedDocuments);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar biblioteca:', error);
+
+                if (active) {
+                    setError(
+                        'Não foi possível carregar sua biblioteca.'
+                    );
+                }
+            } finally {
+                if (active) {
+                    setIsLoading(false);
+                }
+            }
+        }
+
+        loadDocuments();
+
+        return () => {
+            active = false;
+        };
+    }, [setDocuments]);
 
     const navItems = [
         { name: 'Biblioteca', href: '/', icon: BookOpen },
@@ -82,6 +203,7 @@ export default function Home() {
             try {
                 const page = await pdf.getPage(1);
                 const viewport = page.getViewport({ scale: 0.4 });
+
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
 
@@ -101,19 +223,24 @@ export default function Home() {
                     canvas.height = 0;
                 }
             } catch (coverError) {
-                console.warn('Não foi possível gerar a capa:', coverError);
+                console.warn(
+                    'Não foi possível gerar a capa:',
+                    coverError
+                );
             }
 
-            setDocuments((prev) => [
-                ...prev,
-                {
-                    file,
-                    name: file.name,
-                    pages: pdf.numPages,
-                    currentPage: 1,
-                    cover,
-                },
-            ]);
+            const newDocument = {
+                id: crypto.randomUUID(),
+                file,
+                name: file.name,
+                pages: pdf.numPages,
+                currentPage: 1,
+                cover,
+            };
+
+            await saveDocument(newDocument);
+
+            setDocuments((prev) => [...prev, newDocument]);
         } catch (error) {
             console.error('Erro ao importar PDF:', error);
 
@@ -152,16 +279,6 @@ export default function Home() {
             </header>
 
             <div className="mx-auto w-full max-w-5xl flex-1 space-y-8 pt-2">
-                {/* <div className="space-y-2">
-                    <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                        Biblioteca
-                    </h2>
-
-                    <p className="text-sm text-text-muted">
-                        Seus documentos em um só lugar.
-                    </p>
-                </div> */}
-
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="relative w-full sm:max-w-sm">
                         <Search
@@ -179,9 +296,11 @@ export default function Home() {
                         />
                     </div>
 
-                    <span className="text-xs text-right text-text-muted">
+                    <span className="text-right text-xs text-text-muted">
                         {documents.length}{' '}
-                        {documents.length === 1 ? 'documento' : 'documentos'}
+                        {documents.length === 1
+                            ? 'documento'
+                            : 'documentos'}
                     </span>
                 </div>
 
@@ -195,10 +314,17 @@ export default function Home() {
                 )}
 
                 <div className="space-y-3">
-                    {filteredDocuments.length > 0 ? (
+                    {isLoading ? (
+                        <div className="flex min-h-64 items-center justify-center">
+                            <LoaderCircle
+                                size={22}
+                                className="animate-spin text-text-muted"
+                            />
+                        </div>
+                    ) : filteredDocuments.length > 0 ? (
                         filteredDocuments.map((doc) => (
                             <button
-                                key={`${doc.name}-${doc.file.lastModified}`}
+                                key={doc.id}
                                 type="button"
                                 onClick={() => handleOpenDocument(doc)}
                                 className="group flex w-full items-center gap-4 rounded-2xl border border-border-subtle bg-card-bg p-4 text-left transition-colors hover:border-primary-rose/40 hover:bg-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-rose sm:p-5"
@@ -219,7 +345,6 @@ export default function Home() {
                                     <h3 className="truncate text-sm font-medium sm:text-base">
                                         {doc.name}
                                     </h3>
-
 
                                     <p className="mt-1 text-xs text-text-muted">
                                         PDF
@@ -285,13 +410,15 @@ export default function Home() {
                     )}
 
                     <span>
-                        {isImporting ? 'Importando PDF...' : 'Importar PDF'}
+                        {isImporting
+                            ? 'Importando PDF...'
+                            : 'Importar PDF'}
                     </span>
 
                     <input
                         type="file"
                         accept="application/pdf"
-                        disabled={isImporting}
+                        disabled={isImporting || isLoading}
                         className="sr-only"
                         onChange={handleFileChange}
                     />
