@@ -1,64 +1,75 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
+import { GoogleGenAI } from '@google/genai';
+import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
 
-const exec = promisify(execFile);
-
-const python = path.join(
-    process.cwd(),
-    '.venv',
-    'Scripts',
-    'python.exe'
-);
+const model = 'gemini-3.8-flash-lite-tts';
 
 export async function POST(request: Request) {
-    let folder: string | undefined;
-
     try {
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        if (!apiKey) {
+            return NextResponse.json(
+                { error: 'Chave da API não configurada.' },
+                { status: 500 }
+            );
+        }
+
         const { text, voice } = await request.json();
 
-        if (!text || !voice) {
-            return Response.json(
-                { error: 'Texto e voz são obrigatórios.' },
+        if (typeof text !== 'string' || !text.trim()) {
+            return NextResponse.json(
+                { error: 'O texto é obrigatório.' },
                 { status: 400 }
             );
         }
 
-        folder = await mkdtemp(path.join(tmpdir(), 'Letrê-'));
-        const audioPath = path.join(folder, 'audio.mp3');
+        const client = new GoogleGenAI({ apiKey });
 
-        await exec(python, [
-            '-m',
-            'edge_tts',
-            '--voice',
-            voice,
-            '--text',
-            text,
-            '--write-media',
-            audioPath,
-        ]);
+        const response = await client.interactions.create({
+            model,
+            input: [{
+                type: 'user_input',
+                content: [{
+                    type: 'text',
+                    text: text.trim(),
+                    annotations: [{
+                        type: 'speech_metadata',
+                        style: 'Natural, clear audiobook narration with a calm pace and natural pauses. Speak in the language of the supplied text.',
+                    }],
+                }],
+            }],
+            response_format: {
+                type: 'audio',
+            },
+            generation_config: {
+                speech_config: [{
+                    voice: 'Kore',
+                }],
+            },
+        });
 
-        const audio = await readFile(audioPath);
+        const audio = response.output_audio;
 
-        return new Response(new Uint8Array(audio), {
+        if (!audio?.data) {
+            throw new Error('A API não retornou dados de áudio.');
+        }
+
+        const audioBuffer = Buffer.from(audio.data, 'base64');
+
+        return new Response(audioBuffer, {
             headers: {
-                'Content-Type': 'audio/mpeg',
+                'Content-Type': 'audio/wav',
                 'Cache-Control': 'no-store',
             },
         });
     } catch (error) {
-        console.error('Erro no TTS:', error);
+        console.error('Erro no Gemini TTS:', error);
 
-        return Response.json(
-            { error: 'Erro ao processar a solicitação.' },
+        return NextResponse.json(
+            { error: 'Não foi possível gerar o áudio.' },
             { status: 500 }
         );
-    } finally {
-        if (folder) {
-            await rm(folder, { recursive: true, force: true }).catch(() => { });
-        }
     }
 }
